@@ -55,6 +55,14 @@ These skills are designed to be composed into two main research workflows:
 
 **Skills involved:** `auto-review-loop` + `research-review` + `analyze-results` + `monitor-experiment`
 
+**Key safety features of the auto-review loop:**
+
+- **MAX_ROUNDS = 4** — prevents infinite loops; stops early if score threshold is met
+- **> 4 GPU-hour experiments skipped** — won't launch massive jobs; flags them for manual follow-up
+- **Prefer reframing over new experiments** — when both can address a weakness, chooses the cheaper path
+- **No hiding weaknesses** — explicit rule: "Do NOT hide weaknesses to game a positive score"
+- **Fix before re-review** — must actually implement fixes before resubmitting; no empty promises
+
 ### Workflow 2: Literature & Idea Discovery
 
 > **"What's the state of the art? Where are the gaps?"**
