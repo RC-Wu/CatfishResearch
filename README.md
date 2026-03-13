@@ -33,9 +33,10 @@ claude mcp add codex -s user -- codex mcp-server
 
 # 3. Use in Claude Code
 claude
-> /auto-review-loop               # iterate your paper overnight
-> /idea-creator DLLMs post training  # brainstorm ideas from scratch
-> /research-lit discrete diffusion   # survey recent papers
+> /idea-discovery "your research direction"  # Workflow 1: literature → brainstorm → validate
+> /auto-review-loop                          # Workflow 2: review → fix → re-review overnight
+> /paper-writing "NARRATIVE_REPORT.md"       # Workflow 3: narrative → polished PDF
+> /research-pipeline "your research direction"  # Full pipeline: Workflow 1 → 2 end-to-end
 ```
 
 See [full setup guide](#%EF%B8%8F-setup) for details and [alternative model combinations](#-alternative-model-combinations) if you don't have Claude/OpenAI API.
@@ -342,15 +343,27 @@ cp -r skills/research-lit ~/.claude/skills/
 ### Usage
 
 ```
-> /idea-creator DLLMs post training
-> /research-lit discrete diffusion language models
-> /research-review my paper on training dynamics in D-LLMs
-> /auto-review-loop ML paper on factorized gap diagnosis
+# Workflow 1: Idea Discovery
+> /idea-discovery "your research direction"          # full pipeline
+> /research-lit "topic"                              # just literature survey
+> /idea-creator "topic"                              # just brainstorm
+
+# Workflow 2: Auto Research Loop
+> /auto-review-loop "your paper topic"               # review → fix → repeat
+> /research-review "your paper"                      # single deep review
+
+# Workflow 3: Paper Writing
+> /paper-writing "NARRATIVE_REPORT.md"               # full pipeline
+> /paper-plan "NARRATIVE_REPORT.md"                  # just outline
+> /paper-compile "paper/"                            # just compile
+
+# Full Pipeline
+> /research-pipeline "your research direction"       # Workflow 1 → 2 end-to-end
+
+# Supporting Skills
 > /run-experiment train.py --lr 1e-4 --epochs 100
 > /analyze-results figures/*.json
 > /monitor-experiment server5
-> /idea-discovery discrete diffusion language models
-> /research-pipeline DLLMs post training
 ```
 
 ### 🌙 Auto-Allow for Overnight Runs (Optional)

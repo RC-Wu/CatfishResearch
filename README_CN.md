@@ -33,9 +33,10 @@ claude mcp add codex -s user -- codex mcp-server
 
 # 3. 在 Claude Code 中使用
 claude
-> /auto-review-loop               # 一夜迭代论文
-> /idea-creator DLLMs post training  # 从零开始找 idea
-> /research-lit discrete diffusion   # 搜索相关论文
+> /idea-discovery "你的研究方向"              # 工作流 1：文献调研 → 头脑风暴 → 验证
+> /auto-review-loop                          # 工作流 2：审稿 → 修复 → 再审，一夜完成
+> /paper-writing "NARRATIVE_REPORT.md"       # 工作流 3：研究叙事 → 精修 PDF
+> /research-pipeline "你的研究方向"            # 全流程：工作流 1 → 2 端到端
 ```
 
 详见[完整安装指南](#%EF%B8%8F-安装)和[替代模型组合](#-替代模型组合)（无需 Claude/OpenAI API）。
