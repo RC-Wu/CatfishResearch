@@ -84,7 +84,7 @@
 
 ## 审查器配置
 
-审查器通过 `llm-chat` MCP 服务器调用任意 OpenAI 兼容 API。
+审查器通过 `llm-chat` MCP 服务器调用任意API。
 
 ### MCP 服务器配置
 
@@ -110,7 +110,6 @@
 
 | 提供商 | LLM_BASE_URL | LLM_MODEL |
 |--------|--------------|-----------|
-| OpenAI | `https://api.openai.com/v1` | `gpt-4o` |
 | DeepSeek | `https://api.deepseek.com/v1` | `deepseek-chat` |
 | MiniMax | `https://api.minimax.chat/v1` | `MiniMax-M2.5` |
 
@@ -150,78 +149,85 @@
 
 ---
 
-## 🔀 替代方案：GLM + MiniMax（使用 Codex MCP）
+## 常见问题
 
-如果你有 Codex CLI，也可以用 **GLM（智谱）** 做执行者 + **MiniMax-2.5** 做审稿人——同样的跨模型架构，不同的提供商。
+### Q: 为什么不用 Codex MCP？
 
-| 角色 | 默认 | 替代 |
-|------|------|------|
-| 执行者（Claude Code） | Claude Opus/Sonnet | GLM-5 / GLM-4.7（智谱 API） |
-| 审稿人（Codex MCP） | GPT-5.4 | MiniMax-M2.5（MiniMax API） |
+Codex CLI 使用 OpenAI 的 **Responses API** (`/v1/responses`)，这个 API 只有 OpenAI 官方支持，第三方提供商（DeepSeek、MiniMax 等）都不支持。所以我们新建了 `llm-chat` MCP 服务器，使用标准的 **Chat Completions API** (`/v1/chat/completions`)，兼容所有 OpenAI-compatible API。
 
-### 第 1 步：安装 Claude Code 和 Codex CLI
+### Q: GLM/Kimi/LongCat 能用吗？
 
-```bash
-npm install -g @anthropic-ai/claude-code
-npm install -g @openai/codex
-```
+可以！这些提供商支持 Anthropic-compatible API，配置到执行器（`ANTHROPIC_*` 环境变量）即可。审查器（`LLM_*` 环境变量）可以用任意 OpenAI-compatible API。
 
-### 第 2 步：配置 `~/.claude/settings.json`
+---
 
-终端输入：`nano ~/.claude/settings.json`
+## 混搭组合示例
+
+### 组合 1: GLM + DeepSeek（性价比）
 
 ```json
 {
-    "env": {
-        "ANTHROPIC_AUTH_TOKEN": "your_zai_api_key",
-        "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic",
-        "API_TIMEOUT_MS": "3000000",
-        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4.5-air",
-        "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-4.7",
-        "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5",
-        "CODEX_API_KEY": "your_minimax_api_key",
-        "CODEX_API_BASE": "https://api.minimax.chat/v1/",
-        "CODEX_MODEL": "MiniMax-M2.5"
-    },
-    "mcpServers": {
-        "codex": {
-            "command": "/opt/homebrew/bin/codex",
-            "args": [
-                "mcp-server"
-            ]
-        }
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "your-zai-key",
+    "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5"
+  },
+  "mcpServers": {
+    "llm-chat": {
+      "command": "/usr/bin/python3",
+      "args": ["/Users/yourname/.claude/mcp-servers/llm-chat/server.py"],
+      "env": {
+        "LLM_API_KEY": "your-deepseek-key",
+        "LLM_BASE_URL": "https://api.deepseek.com/v1",
+        "LLM_MODEL": "deepseek-chat"
+      }
     }
+  }
 }
 ```
 
-保存：`Ctrl+O` → `Enter` → `Ctrl+X`
+### 组合 2: GLM + Kimi（长文本）
 
-### 第 3 步：安装 Skills 并运行
-
-```bash
-git clone https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep.git
-cd Auto-claude-code-research-in-sleep
-cp -r skills/* ~/.claude/skills/
-
-# 启动 Claude Code（现在由 GLM 驱动）
-claude
+```json
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "your-zai-key",
+    "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5"
+  },
+  "mcpServers": {
+    "llm-chat": {
+      "command": "/usr/bin/python3",
+      "args": ["/Users/yourname/.claude/mcp-servers/llm-chat/server.py"],
+      "env": {
+        "LLM_API_KEY": "your-kimi-key",
+        "LLM_BASE_URL": "https://api.moonshot.cn/v1",
+        "LLM_MODEL": "moonshot-v1-32k"
+      }
+    }
+  }
+}
 ```
 
-### 第 4 步：让 GLM 读一遍项目 ⚠️ 重要
+### 组合 3: 原生 Claude + MiniMax
 
-> **🔴 不要跳过这一步。** GLM 的 prompt 处理方式与 Claude 不同，必须让 GLM 先读一遍项目，确保 skill 文件能正确解析。
-
-启动 `claude` 后，在对话中输入：
-
+```json
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "sk-ant-xxx",
+    "ANTHROPIC_BASE_URL": "https://api.anthropic.com",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-6"
+  },
+  "mcpServers": {
+    "llm-chat": {
+      "command": "/usr/bin/python3",
+      "args": ["/Users/yourname/.claude/mcp-servers/llm-chat/server.py"],
+      "env": {
+        "LLM_API_KEY": "your-minimax-key",
+        "LLM_BASE_URL": "https://api.minimax.chat/v1",
+        "LLM_MODEL": "MiniMax-M2.5"
+      }
+    }
+  }
+}
 ```
-读一下这个项目，验证所有 skills 是否正常：
-/idea-creator, /research-review, /auto-review-loop, /novelty-check,
-/idea-discovery, /research-pipeline, /research-lit, /run-experiment,
-/analyze-results, /monitor-experiment, /pixel-art
-
-逐个确认：(1) 能正常加载 (2) frontmatter 解析正确
-```
-
-这让 GLM（作为 Claude Code 执行者）先熟悉 skill 文件并提前发现兼容性问题——而不是在跑到一半时才报错。
-
-> ⚠️ **注意：** GLM 和 MiniMax 的行为可能与 Claude 和 GPT-5.4 有所不同。你可能需要调整 skill 中的 `REVIEWER_MODEL` 并微调 prompt 模板以获得最佳效果。核心的跨模型架构不变。
