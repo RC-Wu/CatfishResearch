@@ -1,4 +1,4 @@
-# Auto-claude-code-research-in-sleep (ARIS ⚔️)
+# Auto-claude-code-research-in-sleep (ARIS ⚔️🌙)
 
 ![ARIS Logo](docs/aris_logo.svg)
 
