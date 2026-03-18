@@ -55,12 +55,12 @@ If you don't have an OpenAI API key, use the [`llm-chat`](../mcp-servers/llm-cha
 {
   "mcpServers": {
     "llm-chat": {
-      "command": "node",
-      "args": ["/path/to/Auto-claude-code-research-in-sleep/mcp-servers/llm-chat/index.js"],
+      "command": "python3",
+      "args": ["/path/to/Auto-claude-code-research-in-sleep/mcp-servers/llm-chat/server.py"],
       "env": {
-        "LLM_API_BASE": "https://api.deepseek.com/v1",
+        "LLM_BASE_URL": "https://api.deepseek.com/v1",
         "LLM_API_KEY": "your_key",
-        "LLM_MODEL": "deepseek-r1"
+        "LLM_MODEL": "deepseek-chat"
       }
     }
   }
