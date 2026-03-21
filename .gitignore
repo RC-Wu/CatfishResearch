@@ -14,5 +14,10 @@ __pycache__/
 *.pyc
 *.pyo
 
+# Node / app runtime
+node_modules/
+dist/
+apps/aris-control-center/runtime/
+
 # Environment
 .env

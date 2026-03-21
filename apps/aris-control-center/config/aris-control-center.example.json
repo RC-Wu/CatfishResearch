@@ -1,0 +1,205 @@
+{
+  "protocolVersion": "aris.v1",
+  "workspaceRoot": "F:\\InformationAndCourses\\Code\\pua_research",
+  "agentDocRoot": "F:\\InformationAndCourses\\Code\\AgentDoc",
+  "runtimeRoot": "F:\\InformationAndCourses\\Code\\pua_research\\apps\\aris-control-center\\runtime",
+  "codexBinaryPath": "codex",
+  "remoteLauncherScript": "C:\\Users\\Fantastique\\.codex\\skills\\remote-codex-subagents\\scripts\\remote_codex_subagents.py",
+  "routing": {
+    "mode": "weighted-multi-account",
+    "pinProfileId": "current-session",
+    "allowMultiAccount": true,
+    "difficultyTierMap": {
+      "low": "quick",
+      "medium": "balanced",
+      "high": "deep"
+    },
+    "taskKindTierMap": {
+      "research": "deep",
+      "builder": "balanced",
+      "monitor": "quick",
+      "summary": "quick",
+      "review": "balanced"
+    }
+  },
+  "aris": {
+    "dashboardLabel": "ARIS Ops Atlas",
+    "defaultResearchShardCount": 72,
+    "minResearchShardCount": 60,
+    "tmux": {
+      "sessionPrefix": "aris",
+      "defaultCommand": "python -m http.server 8765"
+    },
+    "relays": [
+      {
+        "id": "codex-ai02",
+        "label": "Codex AI02",
+        "provider": "openai-compatible",
+        "baseUrl": "https://codex.ai02.cn/v1",
+        "apiKeyEnv": "ARIS_CODEX_AI02_API_KEY",
+        "enabled": true,
+        "browserCapable": false,
+        "tags": ["codex", "research"]
+      },
+      {
+        "id": "llm-chat-env",
+        "label": "LLM Chat MCP",
+        "provider": "mcp-env-bridge",
+        "baseUrl": "env://LLM_BASE_URL",
+        "apiKeyEnv": "LLM_API_KEY",
+        "enabled": true,
+        "browserCapable": false,
+        "tags": ["compat", "bridge"]
+      }
+    ]
+  },
+  "profiles": [
+    {
+      "id": "current-session",
+      "label": "Current Session",
+      "authStrategy": "inherit-current",
+      "authRoot": "",
+      "enabled": true,
+      "allowSelection": true,
+      "routingWeight": 1.0,
+      "credit": {
+        "mode": "manual",
+        "remaining": 1000,
+        "reserveFloor": 50,
+        "sourcePath": ""
+      },
+      "machineIds": ["pc", "dev-intern-02"],
+      "modelTiers": {
+        "quick": {
+          "model": "gpt-5.4-mini",
+          "reasoningEffort": "low",
+          "search": false,
+          "browserMode": "none"
+        },
+        "balanced": {
+          "model": "gpt-5.4",
+          "reasoningEffort": "medium",
+          "search": true,
+          "browserMode": "codex-search"
+        },
+        "deep": {
+          "model": "gpt-5.4",
+          "reasoningEffort": "high",
+          "search": true,
+          "browserMode": "codex-search"
+        }
+      }
+    },
+    {
+      "id": "dev02-shared",
+      "label": "dev02 Shared Auth",
+      "authStrategy": "auth-root",
+      "authRoot": "/dev_vepfs/rc_wu/.codex",
+      "enabled": true,
+      "allowSelection": true,
+      "routingWeight": 1.4,
+      "credit": {
+        "mode": "manual",
+        "remaining": 800,
+        "reserveFloor": 100,
+        "sourcePath": ""
+      },
+      "machineIds": ["dev-intern-02"],
+      "modelTiers": {
+        "quick": {
+          "model": "gpt-5.4-mini",
+          "reasoningEffort": "medium",
+          "search": true,
+          "browserMode": "codex-search"
+        },
+        "balanced": {
+          "model": "gpt-5.4",
+          "reasoningEffort": "medium",
+          "search": true,
+          "browserMode": "codex-search"
+        },
+        "deep": {
+          "model": "gpt-5.4",
+          "reasoningEffort": "xhigh",
+          "search": true,
+          "browserMode": "codex-search"
+        }
+      }
+    }
+  ],
+  "machines": [
+    {
+      "id": "pc",
+      "label": "Local PC",
+      "launcher": "local",
+      "host": "127.0.0.1",
+      "enabled": true,
+      "workspaceRoot": "F:\\InformationAndCourses\\Code\\pua_research",
+      "agentDocRoot": "F:\\InformationAndCourses\\Code\\AgentDoc"
+    },
+    {
+      "id": "dev-intern-02",
+      "label": "dev-intern-02",
+      "launcher": "remote",
+      "host": "dev-intern-02",
+      "enabled": true,
+      "workspaceRoot": "/dev_vepfs/rc_wu/repos/Auto-claude-code-research-in-sleep",
+      "agentDocRoot": "/dev_vepfs/rc_wu/AgentDoc",
+      "remoteRunRoot": "/dev_vepfs/rc_wu/codex_subagents"
+    }
+  ],
+  "projects": [
+    {
+      "id": "pua_research",
+      "label": "PUA Research",
+      "folderName": "pua_research",
+      "agentDocPath": "PROJECTS/pua_research/PROJECT_DOCS.md",
+      "workspaceRoot": "F:\\InformationAndCourses\\Code\\pua_research",
+      "summary": "Codex-first ARIS stack with dashboard, router, tmux runtime, and deep research planning."
+    },
+    {
+      "id": "codex_subagent_control_plane",
+      "label": "Codex Subagent Control Plane",
+      "folderName": "codex_subagent_control_plane",
+      "agentDocPath": "PROJECTS/codex_subagent_control_plane/PROJECT_DOCS.md",
+      "workspaceRoot": "F:\\InformationAndCourses\\Code\\codex-subagent-control-plane",
+      "summary": "The donor control-plane implementation used as ARIS orchestration substrate.",
+      "panelHidden": false
+    }
+  ],
+  "conversations": [
+    {
+      "id": "aris-control-center",
+      "label": "ARIS Control Center",
+      "projectId": "pua_research",
+      "taskId": "aris-control-center",
+      "machineId": "pc"
+    },
+    {
+      "id": "aris-deep-research",
+      "label": "ARIS Deep Research",
+      "projectId": "pua_research",
+      "taskId": "aris-deep-research",
+      "machineId": "dev-intern-02"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "aris-daily-health",
+      "label": "ARIS Daily Health",
+      "projectId": "pua_research",
+      "conversationId": "aris-control-center",
+      "taskKind": "monitor",
+      "difficulty": "low",
+      "machineId": "dev-intern-02",
+      "trigger": {
+        "mode": "interval",
+        "autoDispatch": false,
+        "intervalMinutes": 60
+      },
+      "search": false,
+      "browserMode": "none",
+      "promptTemplate": "Inspect ARIS runtime health and reply with a concise status delta."
+    }
+  ]
+}
