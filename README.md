@@ -51,9 +51,31 @@ ARIS reads the paper → finds its weaknesses → clones the codebase → genera
 /paper-poster "paper/"     # → A0/A1 poster PDF + editable PPTX + SVG
 ```
 
-> From idea to paper to podium — one toolchain.
+**📝 Rebuttal mode** — reviews are in? ARIS drafts a safe, grounded rebuttal:
+
+```
+/rebuttal "paper/ + reviews" — venue: ICML, character limit: 5000
+```
+
+| Parameter | Default | What it does |
+|-----------|---------|-------------|
+| `venue` | `ICML` | Target venue (ICML/NeurIPS/ICLR/CVPR/ACL/AAAI/ACM) |
+| `character limit` | — | **Required.** Hard character limit for rebuttal text |
+| `quick mode` | `false` | Stop after parsing + strategy (Phase 0-3). See what reviewers want before drafting |
+| `auto experiment` | `false` | Auto-run supplementary experiments via `/experiment-bridge` when reviewers ask for new evidence |
+| `max stress test rounds` | `1` | How many times GPT-5.4 xhigh stress-tests the draft |
+| `max followup rounds` | `3` | Per-reviewer follow-up round limit |
+
+Three safety gates — rebuttal will NOT finalize if any fails:
+- 🔒 **No fabrication** — every claim maps to paper/review/user-confirmed result
+- 🔒 **No overpromise** — every promise is user-approved
+- 🔒 **Full coverage** — every reviewer concern is tracked
+
+Two outputs: `PASTE_READY.txt` (exact char count, paste to venue) + `REBUTTAL_DRAFT_rich.md` (extended version for manual editing).
+
+> From idea to paper to podium to rebuttal — one toolchain.
 >
-> These are full pipelines — you can also use each workflow independently. Already have an idea? Skip to Workflow 1.5. Have results? Jump to Workflow 3. See [Quick Start](#-quick-start) for all commands and [Workflows](#-workflows) for the full breakdown.
+> These are full pipelines — you can also use each workflow independently. Already have an idea? Skip to Workflow 1.5. Have results? Jump to Workflow 3. Got reviews? Jump to Workflow 4. See [Quick Start](#-quick-start) for all commands and [Workflows](#-workflows) for the full breakdown.
 
 ## 🏆 Papers Accepted with ARIS
 
