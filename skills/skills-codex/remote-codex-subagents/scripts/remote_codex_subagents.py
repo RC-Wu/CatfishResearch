@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shlex
 import subprocess
 import sys
@@ -144,26 +145,136 @@ def effective_sandbox(args: argparse.Namespace) -> str:
     return args.sandbox
 
 
-def build_provider_override_flags(args: argparse.Namespace) -> list[str]:
-    if not args.provider_name or not args.provider_base_url:
+def build_provider_override_flags_for_route(route: dict[str, object]) -> list[str]:
+    provider_name = str(route.get("provider_name") or "").strip()
+    provider_base_url = str(route.get("provider_base_url") or "").strip()
+    if not provider_name or not provider_base_url:
         return []
 
-    provider_name = args.provider_name.strip()
-    display_name = (args.provider_display_name or provider_name).strip()
-    requires_openai_auth = "true" if args.provider_requires_openai_auth else "false"
+    display_name = str(route.get("provider_display_name") or provider_name).strip()
+    requires_openai_auth = "true" if bool(route.get("provider_requires_openai_auth")) else "false"
     return [
         "-c",
         f"model_provider={json.dumps(provider_name)}",
         "-c",
         f"model_providers.{provider_name}.name={json.dumps(display_name)}",
         "-c",
-        f"model_providers.{provider_name}.base_url={json.dumps(args.provider_base_url)}",
+        f"model_providers.{provider_name}.base_url={json.dumps(provider_base_url)}",
         "-c",
-        f"model_providers.{provider_name}.wire_api={json.dumps(args.provider_wire_api)}",
+        f"model_providers.{provider_name}.wire_api={json.dumps(str(route.get('provider_wire_api') or 'responses'))}",
         "-c",
-        f"model_providers.{provider_name}.env_key={json.dumps(args.provider_env_key)}",
+        f"model_providers.{provider_name}.env_key={json.dumps(str(route.get('provider_env_key') or 'OPENAI_API_KEY'))}",
         "-c",
         f"model_providers.{provider_name}.requires_openai_auth={requires_openai_auth}",
+    ]
+
+
+def build_provider_override_flags(args: argparse.Namespace) -> list[str]:
+    return build_provider_override_flags_for_route(
+        {
+            "provider_name": args.provider_name,
+            "provider_display_name": args.provider_display_name or args.provider_name,
+            "provider_base_url": args.provider_base_url,
+            "provider_wire_api": args.provider_wire_api,
+            "provider_env_key": args.provider_env_key,
+            "provider_requires_openai_auth": bool(args.provider_requires_openai_auth),
+        }
+    )
+
+
+def bool_from_any(value: object, default: bool = False) -> bool:
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    text = str(value).strip().lower()
+    if text in {"1", "true", "yes", "on"}:
+        return True
+    if text in {"0", "false", "no", "off", ""}:
+        return False
+    raise ValueError(f"Cannot coerce value to bool: {value!r}")
+
+
+def slugify_provider_name(text: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "_", text.lower()).strip("_")
+    return slug or "route"
+
+
+def load_route_specs_from_path(path: Path) -> list[dict[str, object]]:
+    payload = json.loads(path.read_text(encoding="utf-8-sig"))
+    if isinstance(payload, dict):
+        payload = [payload]
+    if not isinstance(payload, list):
+        raise ValueError(f"Route spec file must contain a JSON object or list: {path}")
+    return [dict(item) for item in payload]
+
+
+def normalize_route_spec(
+    spec: dict[str, object],
+    args: argparse.Namespace,
+    default_api_key_file: str,
+    index: int,
+) -> dict[str, object]:
+    provider_base_url = str(spec.get("provider_base_url") or spec.get("base_url") or args.provider_base_url or "").strip()
+    provider_name = str(spec.get("provider_name") or spec.get("name") or args.provider_name or "").strip()
+    if provider_base_url and not provider_name:
+        provider_name = slugify_provider_name(provider_base_url)
+    provider_display_name = str(
+        spec.get("provider_display_name") or spec.get("display_name") or args.provider_display_name or provider_name
+    ).strip()
+    provider_wire_api = str(spec.get("provider_wire_api") or spec.get("wire_api") or args.provider_wire_api or "responses").strip()
+    provider_env_key = str(spec.get("provider_env_key") or spec.get("env_key") or args.provider_env_key or "OPENAI_API_KEY").strip()
+    provider_requires_openai_auth = bool_from_any(
+        spec.get("provider_requires_openai_auth", spec.get("requires_openai_auth")),
+        default=bool(args.provider_requires_openai_auth),
+    )
+    api_key_file = str(spec.get("api_key_file") or spec.get("key_file") or default_api_key_file).strip()
+    model = str(spec.get("model") or args.model or "").strip()
+    route_name = str(
+        spec.get("route_name")
+        or spec.get("label")
+        or provider_name
+        or (Path(api_key_file).stem if api_key_file else "")
+        or f"route_{index + 1}"
+    ).strip()
+    return {
+        "route_name": route_name,
+        "provider_name": provider_name,
+        "provider_display_name": provider_display_name,
+        "provider_base_url": provider_base_url,
+        "provider_wire_api": provider_wire_api,
+        "provider_env_key": provider_env_key,
+        "provider_requires_openai_auth": provider_requires_openai_auth,
+        "api_key_file": api_key_file,
+        "model": model,
+    }
+
+
+def collect_route_specs(args: argparse.Namespace, default_api_key_file: str) -> list[dict[str, object]]:
+    raw_specs: list[dict[str, object]] = []
+    for path in args.route_spec_file or []:
+        raw_specs.extend(load_route_specs_from_path(path))
+    for raw in args.route_spec or []:
+        payload = json.loads(raw)
+        if isinstance(payload, dict):
+            raw_specs.append(dict(payload))
+        elif isinstance(payload, list):
+            raw_specs.extend(dict(item) for item in payload)
+        else:
+            raise ValueError(f"Route spec must decode to a JSON object or list: {raw!r}")
+
+    if raw_specs:
+        return [normalize_route_spec(spec, args, default_api_key_file, idx) for idx, spec in enumerate(raw_specs)]
+
+    route_key_files = list(dict.fromkeys(path.strip() for path in (args.api_key_file or []) if path.strip()))
+    if not route_key_files:
+        route_key_files = [default_api_key_file]
+
+    return [
+        normalize_route_spec({"api_key_file": key_file}, args, default_api_key_file, idx)
+        for idx, key_file in enumerate(route_key_files)
     ]
 
 
@@ -337,7 +448,293 @@ def ensure_proxy(args: argparse.Namespace) -> int:
     return 0
 
 
+def launch_v2(args: argparse.Namespace) -> int:
+    if not args.skip_install:
+        install(args)
+
+    proxy_payload: dict[str, object] | None = None
+    if should_ensure_dev02_proxy(args):
+        proxy_payload = ensure_remote_codex_proxy(args)
+
+    prompt = build_prompt(args)
+    agent_root = f"{args.remote_run_root}/{args.run_id}/{args.agent_name}"
+    ssh(args.host, f"mkdir -p {shlex.quote(agent_root)}")
+
+    prompt_path = f"{agent_root}/prompt.md"
+    wrapper_path = f"{agent_root}/run_agent.sh"
+    pid_path = f"{agent_root}/pid"
+    status_path = f"{agent_root}/status.json"
+    launch_json = f"{agent_root}/launch.json"
+    stdout_log = f"{agent_root}/stdout.log"
+    last_message = f"{agent_root}/last_message.txt"
+    codex_home = str(PurePosixPath(args.remote_home) / ".codex")
+
+    ssh(args.host, f"mkdir -p {shlex.quote(args.remote_home)} {shlex.quote(codex_home)}")
+    write_remote_text(args.host, prompt_path, prompt)
+
+    exec_flags: list[str] = [
+        "--skip-git-repo-check",
+        "--color",
+        "never",
+        "--json",
+        "--output-last-message",
+        last_message,
+        "-s",
+        effective_sandbox(args),
+        "-C",
+        args.cwd,
+        "-",
+    ]
+    prefix_flags: list[str] = []
+    if args.approval:
+        prefix_flags.extend(["-a", args.approval])
+    if args.search:
+        prefix_flags.append("--search")
+    env_setup_lines: list[str] = []
+    for item in args.unset_env or []:
+        env_setup_lines.append(f"unset {shlex.quote(item)} || true")
+    if proxy_payload is not None:
+        for key, value in build_dev02_proxy_env(args).items():
+            env_setup_lines.append(f"export {key}={shlex.quote(value)}")
+    for item in args.env or []:
+        if "=" not in item:
+            raise ValueError(f"Invalid --env value: {item}")
+        key, value = item.split("=", 1)
+        env_setup_lines.append(f"export {key}={shlex.quote(value)}")
+    for add_dir in args.add_dir or []:
+        exec_flags = ["--add-dir", add_dir, *exec_flags]
+    env_setup = "\n".join(env_setup_lines)
+
+    api_key_file = str(PurePosixPath(codex_home) / "aris_primary_api_key.txt")
+    route_specs = collect_route_specs(args, api_key_file)
+    routes_json = json.dumps(route_specs, ensure_ascii=False)
+    exec_flags_json = json.dumps(exec_flags, ensure_ascii=False)
+    prefix_flags_json = json.dumps(prefix_flags, ensure_ascii=False)
+
+    launch_payload = {
+        "host": args.host,
+        "run_id": args.run_id,
+        "agent_name": args.agent_name,
+        "cwd": args.cwd,
+        "sandbox_requested": args.sandbox,
+        "sandbox_effective": effective_sandbox(args),
+        "remote_home": args.remote_home,
+        "remote_binary_store": args.remote_binary_store,
+        "remote_run_root": args.remote_run_root,
+        "prompt_path": prompt_path,
+        "stdout_log": stdout_log,
+        "last_message": last_message,
+        "status_path": status_path,
+        "route_specs": route_specs,
+    }
+    write_remote_text(args.host, launch_json, json.dumps(launch_payload, ensure_ascii=False, indent=2) + "\n")
+
+    wrapper = f"""#!/usr/bin/env bash
+set -euo pipefail
+BIN_STORE={shlex.quote(args.remote_binary_store)}
+TMP_BIN="/tmp/codex_{args.agent_name}_$$"
+PROMPT_PATH={shlex.quote(prompt_path)}
+STDOUT_LOG={shlex.quote(stdout_log)}
+STATUS_PATH={shlex.quote(status_path)}
+CODEX_HOME_PATH={shlex.quote(codex_home)}
+REMOTE_HOME_PATH={shlex.quote(args.remote_home)}
+ROUTES_JSON={shlex.quote(routes_json)}
+EXEC_FLAGS_JSON={shlex.quote(exec_flags_json)}
+PREFIX_FLAGS_JSON={shlex.quote(prefix_flags_json)}
+START_TS="$(date -Is)"
+python3 - <<'PY' "$STATUS_PATH" "$ROUTES_JSON"
+import json
+import pathlib
+import sys
+
+payload = {{
+  "state": "starting",
+  "started_at": "{args.run_id}",
+  "agent_name": {json.dumps(args.agent_name)},
+  "cwd": {json.dumps(args.cwd)},
+  "sandbox_requested": {json.dumps(args.sandbox)},
+  "sandbox_effective": {json.dumps(effective_sandbox(args))},
+  "route_specs": json.loads(sys.argv[2]),
+}}
+pathlib.Path(sys.argv[1]).write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+PY
+cp "$BIN_STORE" "$TMP_BIN"
+chmod +x "$TMP_BIN"
+{env_setup}
+set +e
+python3 - <<'PY' "$TMP_BIN" "$PROMPT_PATH" "$STDOUT_LOG" "$STATUS_PATH" "$CODEX_HOME_PATH" "$REMOTE_HOME_PATH" "$ROUTES_JSON" "$EXEC_FLAGS_JSON" "$PREFIX_FLAGS_JSON" "$START_TS"
+import datetime
+import json
+import os
+import pathlib
+import re
+import subprocess
+import sys
+import time
+
+
+def build_provider_flags(route):
+    provider_name = str(route.get("provider_name") or "").strip()
+    provider_base_url = str(route.get("provider_base_url") or "").strip()
+    if not provider_name or not provider_base_url:
+        return []
+
+    display_name = str(route.get("provider_display_name") or provider_name).strip()
+    wire_api = str(route.get("provider_wire_api") or "responses").strip()
+    env_key = str(route.get("provider_env_key") or "OPENAI_API_KEY").strip()
+    requires_openai_auth = "true" if bool(route.get("provider_requires_openai_auth")) else "false"
+    return [
+        "-c",
+        "model_provider=" + json.dumps(provider_name),
+        "-c",
+        "model_providers." + provider_name + ".name=" + json.dumps(display_name),
+        "-c",
+        "model_providers." + provider_name + ".base_url=" + json.dumps(provider_base_url),
+        "-c",
+        "model_providers." + provider_name + ".wire_api=" + json.dumps(wire_api),
+        "-c",
+        "model_providers." + provider_name + ".env_key=" + json.dumps(env_key),
+        "-c",
+        "model_providers." + provider_name + ".requires_openai_auth=" + requires_openai_auth,
+    ]
+
+
+def should_rotate_route(log_path):
+    if not log_path.exists():
+        return False
+    tail = log_path.read_text(encoding="utf-8", errors="ignore")[-30000:]
+    pattern = (
+        r"unexpected status 401|unexpected status 402|unexpected status 403|unexpected status 429|"
+        r"missing bearer|invalid api key|insufficient[_ -]?quota|quota|rate limit|authentication|"
+        r"payment_required|missing environment variable:.*openai_api_key|未提供令牌"
+    )
+    return re.search(pattern, tail, flags=re.IGNORECASE) is not None
+
+
+tmp_bin, prompt_path, stdout_log, status_path, codex_home_path, remote_home_path, routes_json, exec_flags_json, prefix_flags_json, start_ts = sys.argv[1:]
+routes = json.loads(routes_json)
+exec_flags = json.loads(exec_flags_json)
+prefix_flags = json.loads(prefix_flags_json)
+stdout_path = pathlib.Path(stdout_log)
+status_path_obj = pathlib.Path(status_path)
+prompt_path_obj = pathlib.Path(prompt_path)
+return_code = 1
+route_attempts = 0
+route_index_final = 0
+route_key_file_final = ""
+route_name_final = ""
+provider_name_final = ""
+
+for route_index, route in enumerate(routes):
+    route_attempts += 1
+    route_name = str(route.get("route_name") or ("route_%d" % (route_index + 1)))
+    provider_name = str(route.get("provider_name") or "").strip()
+    route_key_file = str(route.get("api_key_file") or "").strip()
+    route_env_key = str(route.get("provider_env_key") or "OPENAI_API_KEY").strip()
+    route_model = str(route.get("model") or "").strip()
+    route_cmd = [tmp_bin] + prefix_flags + build_provider_flags(route)
+    if route_model:
+        route_cmd.extend(["--model", route_model])
+    route_cmd.append("exec")
+    route_cmd.extend(exec_flags)
+
+    env = os.environ.copy()
+    if route_key_file and pathlib.Path(route_key_file).is_file():
+        key_value = pathlib.Path(route_key_file).read_text(encoding="utf-8", errors="ignore").strip()
+        if key_value:
+            env[route_env_key] = key_value
+            env["OPENAI_API_KEY"] = key_value
+    else:
+        env.pop(route_env_key, None)
+    env["HOME"] = remote_home_path
+    env["CODEX_HOME"] = codex_home_path
+
+    with prompt_path_obj.open("r", encoding="utf-8", errors="ignore") as fin, stdout_path.open("a", encoding="utf-8", errors="ignore") as fout:
+        fout.write(
+            "===== %s route_attempt=%s route_index=%s route_name=%s provider_name=%s key_file=%s model=%s =====\\n"
+            % (
+                datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                route_attempts,
+                route_index,
+                route_name,
+                provider_name,
+                route_key_file,
+                route_model,
+            )
+        )
+        fout.flush()
+        proc = subprocess.run(route_cmd, stdin=fin, stdout=fout, stderr=subprocess.STDOUT, text=True, env=env)
+        return_code = proc.returncode
+        fout.write(
+            "===== %s route_attempt_done rc=%s route_index=%s route_name=%s provider_name=%s key_file=%s =====\\n"
+            % (
+                datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                return_code,
+                route_index,
+                route_name,
+                provider_name,
+                route_key_file,
+            )
+        )
+        fout.flush()
+
+    route_index_final = route_index
+    route_key_file_final = route_key_file
+    route_name_final = route_name
+    provider_name_final = provider_name
+    if return_code == 0:
+        break
+    if route_index + 1 >= len(routes):
+        break
+    if not should_rotate_route(stdout_path):
+        break
+    time.sleep(5)
+
+payload = json.loads(status_path_obj.read_text(encoding="utf-8")) if status_path_obj.exists() else {{}}
+payload["state"] = "finished"
+payload["returncode"] = int(return_code)
+payload["started_at_real"] = start_ts
+payload["finished_at_real"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+payload["route_attempts"] = int(route_attempts)
+payload["route_index_final"] = int(route_index_final)
+payload["route_key_file_final"] = route_key_file_final
+payload["route_name_final"] = route_name_final
+payload["provider_name_final"] = provider_name_final
+status_path_obj.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+raise SystemExit(return_code)
+PY
+RC=$?
+set -e
+rm -f "$TMP_BIN"
+exit "$RC"
+"""
+    write_remote_text(args.host, wrapper_path, wrapper)
+    ssh(args.host, f"chmod +x {shlex.quote(wrapper_path)}")
+    launch_cmd = f"nohup bash {shlex.quote(wrapper_path)} >/dev/null 2>&1 & echo $! > {shlex.quote(pid_path)} && cat {shlex.quote(pid_path)}"
+    proc = ssh(args.host, launch_cmd)
+    payload = {
+        "host": args.host,
+        "run_id": args.run_id,
+        "agent_name": args.agent_name,
+        "pid": proc.stdout.strip(),
+        "agent_root": agent_root,
+        "prompt_path": prompt_path,
+        "stdout_log": stdout_log,
+        "last_message": last_message,
+        "status_path": status_path,
+        "sandbox_requested": args.sandbox,
+        "sandbox_effective": effective_sandbox(args),
+        "route_specs": route_specs,
+    }
+    if proxy_payload is not None:
+        payload["proxy"] = proxy_payload
+    print(json.dumps(payload, ensure_ascii=False, indent=2))
+    return 0
+
+
 def launch(args: argparse.Namespace) -> int:
+    return launch_v2(args)
+
     if not args.skip_install:
         install(args)
 
@@ -615,6 +1012,8 @@ def build_parser() -> argparse.ArgumentParser:
     common.add_argument("--provider-env-key", default="OPENAI_API_KEY")
     common.add_argument("--provider-requires-openai-auth", action="store_true")
     common.add_argument("--api-key-file", action="append", default=[])
+    common.add_argument("--route-spec", action="append", default=[])
+    common.add_argument("--route-spec-file", type=Path, action="append", default=[])
 
     p_install = sub.add_parser("install", parents=[common])
     p_install.set_defaults(func=install)
