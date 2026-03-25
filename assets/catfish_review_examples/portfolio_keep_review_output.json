@@ -1,0 +1,676 @@
+{
+  "competitionId": "comp-parent-review",
+  "decisionMode": "portfolio_keep",
+  "difficulty": "high",
+  "generatedAt": "2026-03-25T13:00:00Z",
+  "officialWriterNodeId": "parent-root",
+  "parentNodeId": "parent-root",
+  "portfolio": {
+    "keptForDiversityRunIds": [
+      "run-b2"
+    ],
+    "orderedRunIds": [
+      "run-a2",
+      "run-b2",
+      "run-c2"
+    ],
+    "prunedRunIds": [
+      "run-c2"
+    ],
+    "retainedRunIds": [
+      "run-a2",
+      "run-b2"
+    ],
+    "winnerRunId": "run-a2"
+  },
+  "projectId": "proj-parent-review",
+  "reviewId": "example-parent-review-portfolio",
+  "router_capability_updates": {
+    "append_only": true,
+    "entries": [
+      {
+        "agentGroupId": "builder+critic",
+        "confidence": 0.9,
+        "decision": "selected",
+        "difficulty": "high",
+        "dimensionScores": {
+          "agent_group": 0.8,
+          "diversity_contribution": 0.4,
+          "idea": 0.86,
+          "model": 0.84,
+          "outcome_quality": 0.88,
+          "provider": 0.82,
+          "resource_usage": 0.65,
+          "risk": 0.2
+        },
+        "evidenceRefs": [
+          "ideas/run-a2.md"
+        ],
+        "id": "example-parent-review-portfolio:run-a2:ucloud-modelverse",
+        "modelId": "gpt-5.4",
+        "notes": "Parent parent-root reviewed run run-a2 with decision selected and composite 0.665.",
+        "parentNodeId": "parent-root",
+        "parentScore": 0.88,
+        "providerId": "ucloud-modelverse",
+        "reasoningLength": "long",
+        "reasoningTier": "deep",
+        "recency": "2026-03-25T13:00:00Z",
+        "routingEffect": "prefer",
+        "runId": "run-a2",
+        "scoreDelta": 0.683333,
+        "sourceReviewId": "example-parent-review-portfolio",
+        "sourceScorecardId": "example-parent-review-portfolio.run-a2",
+        "sourceVerdictId": "example-parent-review-portfolio.verdict",
+        "taskCategory": "research"
+      },
+      {
+        "agentGroupId": "explorer+critic",
+        "confidence": 0.91,
+        "decision": "survive",
+        "difficulty": "high",
+        "dimensionScores": {
+          "agent_group": 0.7,
+          "diversity_contribution": 0.95,
+          "idea": 0.75,
+          "model": 0.68,
+          "outcome_quality": 0.75,
+          "provider": 0.62,
+          "resource_usage": 0.55,
+          "risk": 0.35
+        },
+        "evidenceRefs": [
+          "ideas/run-b2.md"
+        ],
+        "id": "example-parent-review-portfolio:run-b2:anthropic",
+        "modelId": "claude-sonnet",
+        "notes": "Parent parent-root reviewed run run-b2 with decision survive and composite 0.660.",
+        "parentNodeId": "parent-root",
+        "parentScore": 0.88,
+        "providerId": "anthropic",
+        "reasoningLength": "medium",
+        "reasoningTier": "balanced",
+        "recency": "2026-03-25T13:00:00Z",
+        "routingEffect": "neutral",
+        "runId": "run-b2",
+        "scoreDelta": 0.39,
+        "sourceReviewId": "example-parent-review-portfolio",
+        "sourceScorecardId": "example-parent-review-portfolio.run-b2",
+        "sourceVerdictId": "example-parent-review-portfolio.verdict",
+        "taskCategory": "research"
+      },
+      {
+        "agentGroupId": "critic-only",
+        "confidence": 0.84,
+        "decision": "pruned",
+        "difficulty": "high",
+        "dimensionScores": {
+          "agent_group": 0.6,
+          "diversity_contribution": 0.35,
+          "idea": 0.54,
+          "model": 0.58,
+          "outcome_quality": 0.57,
+          "provider": 0.52,
+          "resource_usage": 0.82,
+          "risk": 0.48
+        },
+        "evidenceRefs": [
+          "ideas/run-c2.md"
+        ],
+        "id": "example-parent-review-portfolio:run-c2:openrouter",
+        "modelId": "qwen-plus",
+        "notes": "Parent parent-root reviewed run run-c2 with decision pruned and composite 0.453.",
+        "parentNodeId": "parent-root",
+        "parentScore": 0.88,
+        "providerId": "openrouter",
+        "reasoningLength": "medium",
+        "reasoningTier": "balanced",
+        "recency": "2026-03-25T13:00:00Z",
+        "routingEffect": "penalize",
+        "runId": "run-c2",
+        "scoreDelta": 0.056667,
+        "sourceReviewId": "example-parent-review-portfolio",
+        "sourceScorecardId": "example-parent-review-portfolio.run-c2",
+        "sourceVerdictId": "example-parent-review-portfolio.verdict",
+        "taskCategory": "research"
+      }
+    ]
+  },
+  "runtime_verdict": {
+    "capability_updates": [
+      {
+        "capability": "idea_generation",
+        "confidence": 0.9,
+        "node_id": "child-a",
+        "score": 0.9,
+        "summary": "Parent preferred the strongest overall proposal."
+      },
+      {
+        "capability": "provider:ucloud-modelverse",
+        "confidence": 0.9,
+        "node_id": "child-a",
+        "score": 0.82,
+        "summary": "Parent review example-parent-review-portfolio.run-a2 audited provider stack quality for ucloud-modelverse."
+      },
+      {
+        "capability": "model:gpt-5.4",
+        "confidence": 0.9,
+        "node_id": "child-a",
+        "score": 0.84,
+        "summary": "Parent review example-parent-review-portfolio.run-a2 audited model stack quality for gpt-5.4."
+      },
+      {
+        "capability": "agent_group:builder+critic",
+        "confidence": 0.9,
+        "node_id": "child-a",
+        "score": 0.8,
+        "summary": "Parent review example-parent-review-portfolio.run-a2 audited agent_group stack quality for builder+critic."
+      },
+      {
+        "capability": "provider:anthropic",
+        "confidence": 0.91,
+        "node_id": "child-b",
+        "score": 0.62,
+        "summary": "Parent review example-parent-review-portfolio.run-b2 audited provider stack quality for anthropic."
+      },
+      {
+        "capability": "model:claude-sonnet",
+        "confidence": 0.91,
+        "node_id": "child-b",
+        "score": 0.68,
+        "summary": "Parent review example-parent-review-portfolio.run-b2 audited model stack quality for claude-sonnet."
+      },
+      {
+        "capability": "agent_group:explorer+critic",
+        "confidence": 0.91,
+        "node_id": "child-b",
+        "score": 0.7,
+        "summary": "Parent review example-parent-review-portfolio.run-b2 audited agent_group stack quality for explorer+critic."
+      },
+      {
+        "capability": "provider:openrouter",
+        "confidence": 0.84,
+        "node_id": "child-c",
+        "score": 0.52,
+        "summary": "Parent review example-parent-review-portfolio.run-c2 audited provider stack quality for openrouter."
+      },
+      {
+        "capability": "model:qwen-plus",
+        "confidence": 0.84,
+        "node_id": "child-c",
+        "score": 0.58,
+        "summary": "Parent review example-parent-review-portfolio.run-c2 audited model stack quality for qwen-plus."
+      },
+      {
+        "capability": "agent_group:critic-only",
+        "confidence": 0.84,
+        "node_id": "child-c",
+        "score": 0.6,
+        "summary": "Parent review example-parent-review-portfolio.run-c2 audited agent_group stack quality for critic-only."
+      }
+    ],
+    "competition_id": "comp-parent-review",
+    "metadata": {
+      "capability_update_log": [
+        {
+          "capability": "idea_generation",
+          "confidence": 0.9,
+          "node_id": "child-a",
+          "parent_node_id": "parent-root",
+          "run_id": "run-a2",
+          "score": 0.9,
+          "source": "declared",
+          "source_scorecard_id": "example-parent-review-portfolio.run-a2",
+          "summary": "Parent preferred the strongest overall proposal.",
+          "update_id": "example-parent-review-portfolio.run-a2:idea_generation"
+        },
+        {
+          "capability": "provider:ucloud-modelverse",
+          "confidence": 0.9,
+          "node_id": "child-a",
+          "parent_node_id": "parent-root",
+          "run_id": "run-a2",
+          "score": 0.82,
+          "source": "derived",
+          "source_scorecard_id": "example-parent-review-portfolio.run-a2",
+          "summary": "Parent review example-parent-review-portfolio.run-a2 audited provider stack quality for ucloud-modelverse.",
+          "update_id": "example-parent-review-portfolio.run-a2:provider:ucloud-modelverse"
+        },
+        {
+          "capability": "model:gpt-5.4",
+          "confidence": 0.9,
+          "node_id": "child-a",
+          "parent_node_id": "parent-root",
+          "run_id": "run-a2",
+          "score": 0.84,
+          "source": "derived",
+          "source_scorecard_id": "example-parent-review-portfolio.run-a2",
+          "summary": "Parent review example-parent-review-portfolio.run-a2 audited model stack quality for gpt-5.4.",
+          "update_id": "example-parent-review-portfolio.run-a2:model:gpt-5.4"
+        },
+        {
+          "capability": "agent_group:builder+critic",
+          "confidence": 0.9,
+          "node_id": "child-a",
+          "parent_node_id": "parent-root",
+          "run_id": "run-a2",
+          "score": 0.8,
+          "source": "derived",
+          "source_scorecard_id": "example-parent-review-portfolio.run-a2",
+          "summary": "Parent review example-parent-review-portfolio.run-a2 audited agent_group stack quality for builder+critic.",
+          "update_id": "example-parent-review-portfolio.run-a2:agent_group:builder+critic"
+        },
+        {
+          "capability": "provider:anthropic",
+          "confidence": 0.91,
+          "node_id": "child-b",
+          "parent_node_id": "parent-root",
+          "run_id": "run-b2",
+          "score": 0.62,
+          "source": "derived",
+          "source_scorecard_id": "example-parent-review-portfolio.run-b2",
+          "summary": "Parent review example-parent-review-portfolio.run-b2 audited provider stack quality for anthropic.",
+          "update_id": "example-parent-review-portfolio.run-b2:provider:anthropic"
+        },
+        {
+          "capability": "model:claude-sonnet",
+          "confidence": 0.91,
+          "node_id": "child-b",
+          "parent_node_id": "parent-root",
+          "run_id": "run-b2",
+          "score": 0.68,
+          "source": "derived",
+          "source_scorecard_id": "example-parent-review-portfolio.run-b2",
+          "summary": "Parent review example-parent-review-portfolio.run-b2 audited model stack quality for claude-sonnet.",
+          "update_id": "example-parent-review-portfolio.run-b2:model:claude-sonnet"
+        },
+        {
+          "capability": "agent_group:explorer+critic",
+          "confidence": 0.91,
+          "node_id": "child-b",
+          "parent_node_id": "parent-root",
+          "run_id": "run-b2",
+          "score": 0.7,
+          "source": "derived",
+          "source_scorecard_id": "example-parent-review-portfolio.run-b2",
+          "summary": "Parent review example-parent-review-portfolio.run-b2 audited agent_group stack quality for explorer+critic.",
+          "update_id": "example-parent-review-portfolio.run-b2:agent_group:explorer+critic"
+        },
+        {
+          "capability": "provider:openrouter",
+          "confidence": 0.84,
+          "node_id": "child-c",
+          "parent_node_id": "parent-root",
+          "run_id": "run-c2",
+          "score": 0.52,
+          "source": "derived",
+          "source_scorecard_id": "example-parent-review-portfolio.run-c2",
+          "summary": "Parent review example-parent-review-portfolio.run-c2 audited provider stack quality for openrouter.",
+          "update_id": "example-parent-review-portfolio.run-c2:provider:openrouter"
+        },
+        {
+          "capability": "model:qwen-plus",
+          "confidence": 0.84,
+          "node_id": "child-c",
+          "parent_node_id": "parent-root",
+          "run_id": "run-c2",
+          "score": 0.58,
+          "source": "derived",
+          "source_scorecard_id": "example-parent-review-portfolio.run-c2",
+          "summary": "Parent review example-parent-review-portfolio.run-c2 audited model stack quality for qwen-plus.",
+          "update_id": "example-parent-review-portfolio.run-c2:model:qwen-plus"
+        },
+        {
+          "capability": "agent_group:critic-only",
+          "confidence": 0.84,
+          "node_id": "child-c",
+          "parent_node_id": "parent-root",
+          "run_id": "run-c2",
+          "score": 0.6,
+          "source": "derived",
+          "source_scorecard_id": "example-parent-review-portfolio.run-c2",
+          "summary": "Parent review example-parent-review-portfolio.run-c2 audited agent_group stack quality for critic-only.",
+          "update_id": "example-parent-review-portfolio.run-c2:agent_group:critic-only"
+        }
+      ],
+      "decision_mode": "portfolio_keep",
+      "kept_for_diversity_run_ids": [
+        "run-b2"
+      ],
+      "pruned_run_ids": [
+        "run-c2"
+      ],
+      "retained_run_ids": [
+        "run-a2",
+        "run-b2"
+      ],
+      "review_id": "example-parent-review-portfolio",
+      "router_ledger_entry_ids": [
+        "example-parent-review-portfolio:run-a2:ucloud-modelverse",
+        "example-parent-review-portfolio:run-b2:anthropic",
+        "example-parent-review-portfolio:run-c2:openrouter"
+      ],
+      "schemaVersion": "catfish.parent-review.v1",
+      "scorecard_ids_by_run_id": {
+        "run-a2": "example-parent-review-portfolio.run-a2",
+        "run-b2": "example-parent-review-portfolio.run-b2",
+        "run-c2": "example-parent-review-portfolio.run-c2"
+      },
+      "stage_id": "ideation",
+      "stage_kind": "ideation"
+    },
+    "parent_node_id": "parent-root",
+    "rationale": "Parent parent-root reviewed 3 child runs under portfolio_keep; winner=run-a2; retained=run-a2,run-b2.",
+    "score_by_run_id": {
+      "run-a2": 0.6648,
+      "run-b2": 0.6604,
+      "run-c2": 0.4525
+    },
+    "submitted_at": "2026-03-25T13:00:00Z",
+    "verdict_id": "example-parent-review-portfolio.verdict",
+    "winner_run_id": "run-a2"
+  },
+  "schemaVersion": "catfish.parent-review.v1",
+  "scorecards": [
+    {
+      "advisory_inputs": {
+        "child_notes": "",
+        "self_assessment": null
+      },
+      "child_node_id": "child-a",
+      "competition_id": "comp-parent-review",
+      "composite_normalized": 0.6648,
+      "composite_raw": 0.6648,
+      "confidence": 0.9,
+      "confidence_penalty": 0.005,
+      "decision": "selected",
+      "decision_hint": null,
+      "decision_reason": "Parent selected run-a2 as the official winner with composite 0.665 and outcome_quality 0.880.",
+      "evidence_refs": [
+        "ideas/run-a2.md"
+      ],
+      "legacy_projection": {
+        "childNodeId": "child-a",
+        "composite": 0.6648,
+        "decision": "selected",
+        "decisionReason": "Parent selected run-a2 as the official winner with composite 0.665 and outcome_quality 0.880.",
+        "evidenceRefs": [
+          "ideas/run-a2.md"
+        ],
+        "parentNodeId": "parent-root",
+        "resourceSnapshot": {
+          "agentGroup": "builder+critic",
+          "cost": 2.8,
+          "model": "gpt-5.4",
+          "provider": "ucloud-modelverse",
+          "wallTimeSeconds": 240.0
+        },
+        "scorecardId": "example-parent-review-portfolio.run-a2",
+        "scores": {
+          "agentGroup": 0.8,
+          "idea": 0.86,
+          "model": 0.84,
+          "outcomeQuality": 0.88,
+          "provider": 0.82,
+          "resourceUsage": 0.65,
+          "risk": 0.2
+        },
+        "stageId": "ideation",
+        "supersedes": null,
+        "timestamp": "2026-03-25T13:00:00Z",
+        "weights": {
+          "agentGroup": 0.1,
+          "idea": 0.24,
+          "model": 0.08,
+          "outcomeQuality": 0.19,
+          "provider": 0.05,
+          "resourceUsage": 0.08,
+          "risk": 0.08
+        }
+      },
+      "notes": "",
+      "official_writer_node_id": "parent-root",
+      "parent_node_id": "parent-root",
+      "resource_snapshot": {
+        "agent_group": "builder+critic",
+        "completion_tokens": 1000,
+        "cost_usd": 2.8,
+        "model": "gpt-5.4",
+        "prompt_tokens": 3000,
+        "provider": "ucloud-modelverse",
+        "wall_time_s": 240.0
+      },
+      "review_id": "example-parent-review-portfolio",
+      "run_id": "run-a2",
+      "scorecard_id": "example-parent-review-portfolio.run-a2",
+      "scores": {
+        "agent_group": 0.8,
+        "diversity_contribution": 0.4,
+        "idea": 0.86,
+        "model": 0.84,
+        "outcome_quality": 0.88,
+        "provider": 0.82,
+        "resource_usage": 0.65,
+        "risk": 0.2
+      },
+      "stack_signature": "ucloud-modelverse|gpt-5.4|builder+critic",
+      "stage_id": "ideation",
+      "stage_kind": "ideation",
+      "timestamp": "2026-03-25T13:00:00Z",
+      "weights": {
+        "agent_group": 0.1,
+        "diversity_contribution": 0.18,
+        "idea": 0.24,
+        "model": 0.08,
+        "outcome_quality": 0.19,
+        "provider": 0.05,
+        "resource_usage": 0.08,
+        "risk": 0.08
+      }
+    },
+    {
+      "advisory_inputs": {
+        "child_notes": "",
+        "self_assessment": null
+      },
+      "child_node_id": "child-b",
+      "competition_id": "comp-parent-review",
+      "composite_normalized": 0.6604,
+      "composite_raw": 0.6604,
+      "confidence": 0.91,
+      "confidence_penalty": 0.0045,
+      "decision": "survive",
+      "decision_hint": null,
+      "decision_reason": "Parent kept run-b2 in the portfolio because it preserves stack diversity (anthropic|claude-sonnet|explorer+critic) with diversity_contribution 0.950.",
+      "evidence_refs": [
+        "ideas/run-b2.md"
+      ],
+      "legacy_projection": {
+        "childNodeId": "child-b",
+        "composite": 0.6604,
+        "decision": "survive",
+        "decisionReason": "Parent kept run-b2 in the portfolio because it preserves stack diversity (anthropic|claude-sonnet|explorer+critic) with diversity_contribution 0.950.",
+        "evidenceRefs": [
+          "ideas/run-b2.md"
+        ],
+        "parentNodeId": "parent-root",
+        "resourceSnapshot": {
+          "agentGroup": "explorer+critic",
+          "cost": 2.1,
+          "model": "claude-sonnet",
+          "provider": "anthropic",
+          "wallTimeSeconds": 210.0
+        },
+        "scorecardId": "example-parent-review-portfolio.run-b2",
+        "scores": {
+          "agentGroup": 0.7,
+          "idea": 0.75,
+          "model": 0.68,
+          "outcomeQuality": 0.75,
+          "provider": 0.62,
+          "resourceUsage": 0.55,
+          "risk": 0.35
+        },
+        "stageId": "ideation",
+        "supersedes": null,
+        "timestamp": "2026-03-25T13:00:00Z",
+        "weights": {
+          "agentGroup": 0.1,
+          "idea": 0.24,
+          "model": 0.08,
+          "outcomeQuality": 0.19,
+          "provider": 0.05,
+          "resourceUsage": 0.08,
+          "risk": 0.08
+        }
+      },
+      "notes": "",
+      "official_writer_node_id": "parent-root",
+      "parent_node_id": "parent-root",
+      "resource_snapshot": {
+        "agent_group": "explorer+critic",
+        "completion_tokens": 900,
+        "cost_usd": 2.1,
+        "model": "claude-sonnet",
+        "prompt_tokens": 2600,
+        "provider": "anthropic",
+        "wall_time_s": 210.0
+      },
+      "review_id": "example-parent-review-portfolio",
+      "run_id": "run-b2",
+      "scorecard_id": "example-parent-review-portfolio.run-b2",
+      "scores": {
+        "agent_group": 0.7,
+        "diversity_contribution": 0.95,
+        "idea": 0.75,
+        "model": 0.68,
+        "outcome_quality": 0.75,
+        "provider": 0.62,
+        "resource_usage": 0.55,
+        "risk": 0.35
+      },
+      "stack_signature": "anthropic|claude-sonnet|explorer+critic",
+      "stage_id": "ideation",
+      "stage_kind": "ideation",
+      "timestamp": "2026-03-25T13:00:00Z",
+      "weights": {
+        "agent_group": 0.1,
+        "diversity_contribution": 0.18,
+        "idea": 0.24,
+        "model": 0.08,
+        "outcome_quality": 0.19,
+        "provider": 0.05,
+        "resource_usage": 0.08,
+        "risk": 0.08
+      }
+    },
+    {
+      "advisory_inputs": {
+        "child_notes": "",
+        "self_assessment": null
+      },
+      "child_node_id": "child-c",
+      "competition_id": "comp-parent-review",
+      "composite_normalized": 0.4525,
+      "composite_raw": 0.4525,
+      "confidence": 0.84,
+      "confidence_penalty": 0.008,
+      "decision": "pruned",
+      "decision_hint": null,
+      "decision_reason": "Parent pruned run-c2 after comparing normalized scorecards under portfolio_keep.",
+      "evidence_refs": [
+        "ideas/run-c2.md"
+      ],
+      "legacy_projection": {
+        "childNodeId": "child-c",
+        "composite": 0.4525,
+        "decision": "pruned",
+        "decisionReason": "Parent pruned run-c2 after comparing normalized scorecards under portfolio_keep.",
+        "evidenceRefs": [
+          "ideas/run-c2.md"
+        ],
+        "parentNodeId": "parent-root",
+        "resourceSnapshot": {
+          "agentGroup": "critic-only",
+          "cost": 1.4,
+          "model": "qwen-plus",
+          "provider": "openrouter",
+          "wallTimeSeconds": 190.0
+        },
+        "scorecardId": "example-parent-review-portfolio.run-c2",
+        "scores": {
+          "agentGroup": 0.6,
+          "idea": 0.54,
+          "model": 0.58,
+          "outcomeQuality": 0.57,
+          "provider": 0.52,
+          "resourceUsage": 0.82,
+          "risk": 0.48
+        },
+        "stageId": "ideation",
+        "supersedes": null,
+        "timestamp": "2026-03-25T13:00:00Z",
+        "weights": {
+          "agentGroup": 0.1,
+          "idea": 0.24,
+          "model": 0.08,
+          "outcomeQuality": 0.19,
+          "provider": 0.05,
+          "resourceUsage": 0.08,
+          "risk": 0.08
+        }
+      },
+      "notes": "",
+      "official_writer_node_id": "parent-root",
+      "parent_node_id": "parent-root",
+      "resource_snapshot": {
+        "agent_group": "critic-only",
+        "completion_tokens": 700,
+        "cost_usd": 1.4,
+        "model": "qwen-plus",
+        "prompt_tokens": 2200,
+        "provider": "openrouter",
+        "wall_time_s": 190.0
+      },
+      "review_id": "example-parent-review-portfolio",
+      "run_id": "run-c2",
+      "scorecard_id": "example-parent-review-portfolio.run-c2",
+      "scores": {
+        "agent_group": 0.6,
+        "diversity_contribution": 0.35,
+        "idea": 0.54,
+        "model": 0.58,
+        "outcome_quality": 0.57,
+        "provider": 0.52,
+        "resource_usage": 0.82,
+        "risk": 0.48
+      },
+      "stack_signature": "openrouter|qwen-plus|critic-only",
+      "stage_id": "ideation",
+      "stage_kind": "ideation",
+      "timestamp": "2026-03-25T13:00:00Z",
+      "weights": {
+        "agent_group": 0.1,
+        "diversity_contribution": 0.18,
+        "idea": 0.24,
+        "model": 0.08,
+        "outcome_quality": 0.19,
+        "provider": 0.05,
+        "resource_usage": 0.08,
+        "risk": 0.08
+      }
+    }
+  ],
+  "stageId": "ideation",
+  "stageKind": "ideation",
+  "taskCategory": "research",
+  "weights": {
+    "agent_group": 0.1,
+    "diversity_contribution": 0.18,
+    "idea": 0.24,
+    "model": 0.08,
+    "outcome_quality": 0.19,
+    "provider": 0.05,
+    "resource_usage": 0.08,
+    "risk": 0.08
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "review_id": "example-parent-review-portfolio",
+  "project_id": "proj-parent-review",
+  "competition_id": "comp-parent-review",
+  "stage_id": "ideation",
+  "stage_kind": "ideation",
+  "task_category": "research",
+  "difficulty": "high",
+  "decision_mode": "portfolio_keep",
+  "parent_node_id": "parent-root",
+  "official_writer_node_id": "parent-root",
+  "parent_score": 0.88,
+  "timestamp": "2026-03-25T13:00:00Z",
+  "portfolio_policy": {
+    "max_survivors": 2,
+    "diversity_floor": 0.8,
+    "max_score_gap": 0.08
+  },
+  "children": [
+    {
+      "run_id": "run-a2",
+      "node_id": "child-a",
+      "metadata": {
+        "agent_group": "builder+critic"
+      },
+      "provider_assignment": {
+        "provider": "ucloud-modelverse",
+        "model": "gpt-5.4",
+        "reasoning_effort": "high",
+        "metadata": {
+          "routing_tier": "deep"
+        }
+      },
+      "resource_usage": {
+        "prompt_tokens": 3000,
+        "completion_tokens": 1000,
+        "cost_usd": 2.8,
+        "wall_time_s": 240
+      },
+      "evaluator_note": {
+        "author_node_id": "parent-root",
+        "dimension_scores": {
+          "idea": 0.86,
+          "model": 0.84,
+          "provider": 0.82,
+          "agent_group": 0.8,
+          "diversity_contribution": 0.4,
+          "resource_usage": 0.65,
+          "outcome_quality": 0.88,
+          "risk": 0.2
+        },
+        "confidence": 0.9,
+        "evidence_refs": [
+          "ideas/run-a2.md"
+        ],
+        "capabilities": [
+          {
+            "capability": "idea_generation",
+            "score": 0.9,
+            "summary": "Parent preferred the strongest overall proposal."
+          }
+        ]
+      }
+    },
+    {
+      "run_id": "run-b2",
+      "node_id": "child-b",
+      "metadata": {
+        "agent_group": "explorer+critic"
+      },
+      "provider_assignment": {
+        "provider": "anthropic",
+        "model": "claude-sonnet",
+        "reasoning_effort": "medium"
+      },
+      "resource_usage": {
+        "prompt_tokens": 2600,
+        "completion_tokens": 900,
+        "cost_usd": 2.1,
+        "wall_time_s": 210
+      },
+      "evaluator_note": {
+        "author_node_id": "parent-root",
+        "dimension_scores": {
+          "idea": 0.75,
+          "model": 0.68,
+          "provider": 0.62,
+          "agent_group": 0.7,
+          "diversity_contribution": 0.95,
+          "resource_usage": 0.55,
+          "outcome_quality": 0.75,
+          "risk": 0.35
+        },
+        "confidence": 0.91,
+        "evidence_refs": [
+          "ideas/run-b2.md"
+        ]
+      }
+    },
+    {
+      "run_id": "run-c2",
+      "node_id": "child-c",
+      "metadata": {
+        "agent_group": "critic-only"
+      },
+      "provider_assignment": {
+        "provider": "openrouter",
+        "model": "qwen-plus",
+        "reasoning_effort": "medium"
+      },
+      "resource_usage": {
+        "prompt_tokens": 2200,
+        "completion_tokens": 700,
+        "cost_usd": 1.4,
+        "wall_time_s": 190
+      },
+      "evaluator_note": {
+        "author_node_id": "parent-root",
+        "dimension_scores": {
+          "idea": 0.54,
+          "model": 0.58,
+          "provider": 0.52,
+          "agent_group": 0.6,
+          "diversity_contribution": 0.35,
+          "resource_usage": 0.82,
+          "outcome_quality": 0.57,
+          "risk": 0.48
+        },
+        "confidence": 0.84,
+        "evidence_refs": [
+          "ideas/run-c2.md"
+        ]
+      }
+    }
+  ]
+}
