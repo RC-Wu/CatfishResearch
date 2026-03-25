@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://catfish.local/schemas/scorecard.schema.json",
+  "title": "Catfish Parent-Owned Scorecard",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "scorecardId",
+    "parentNodeId",
+    "childNodeId",
+    "stageId",
+    "timestamp",
+    "weights",
+    "scores",
+    "composite",
+    "decision",
+    "decisionReason",
+    "evidenceRefs",
+    "resourceSnapshot"
+  ],
+  "properties": {
+    "scorecardId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "parentNodeId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "childNodeId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "stageId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "weights": {
+      "$ref": "#/$defs/dimensionMap"
+    },
+    "scores": {
+      "$ref": "#/$defs/dimensionMap"
+    },
+    "composite": {
+      "type": "number",
+      "minimum": -1.0,
+      "maximum": 1.0
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "selected",
+        "survive",
+        "merge",
+        "replay",
+        "hold",
+        "pruned",
+        "archived"
+      ]
+    },
+    "decisionReason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "resourceSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cost",
+        "wallTimeSeconds",
+        "provider",
+        "model",
+        "agentGroup"
+      ],
+      "properties": {
+        "cost": {
+          "type": "number",
+          "minimum": 0.0
+        },
+        "wallTimeSeconds": {
+          "type": "number",
+          "minimum": 0.0
+        },
+        "provider": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "agentGroup": {
+          "type": "string"
+        }
+      }
+    },
+    "supersedes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "$defs": {
+    "dimensionMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "idea",
+        "model",
+        "provider",
+        "agentGroup",
+        "resourceUsage",
+        "outcomeQuality",
+        "risk"
+      ],
+      "properties": {
+        "idea": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "model": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "provider": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "agentGroup": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "resourceUsage": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "outcomeQuality": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "risk": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        }
+      }
+    }
+  }
+}

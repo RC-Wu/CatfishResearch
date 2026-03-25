@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://catfish.local/schemas/scheduling_graph.schema.json",
+  "title": "Catfish Scheduling Graph",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "graphId",
+    "timestamp",
+    "rootNodeId",
+    "nodes",
+    "edges"
+  ],
+  "properties": {
+    "graphId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "rootNodeId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/node"
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/edge"
+      }
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nodeId",
+        "nodeType",
+        "scope",
+        "state",
+        "remainingBudget",
+        "visits"
+      ],
+      "properties": {
+        "nodeId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:-]+$"
+        },
+        "nodeType": {
+          "type": "string",
+          "enum": [
+            "system-root",
+            "project",
+            "team",
+            "stage",
+            "candidate",
+            "integrator"
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "system",
+            "project",
+            "team",
+            "node"
+          ]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "ready",
+            "running",
+            "held",
+            "selected",
+            "pruned",
+            "archived",
+            "failed"
+          ]
+        },
+        "remainingBudget": {
+          "type": "number"
+        },
+        "visits": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "realizedReward": {
+          "type": "number"
+        },
+        "prior": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "frontierWidth": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to",
+        "action",
+        "selectionValue"
+      ],
+      "properties": {
+        "from": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:-]+$"
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:-]+$"
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "expand",
+            "deepen",
+            "replay",
+            "merge",
+            "hold",
+            "prune",
+            "archive",
+            "self-update"
+          ]
+        },
+        "selectionValue": {
+          "type": "number"
+        },
+        "decisionReason": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
