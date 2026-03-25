@@ -1,0 +1,215 @@
+{
+  "generated_at": "2026-03-25T12:00:00Z",
+  "metadata": {
+    "workspace": "control_center",
+    "runtime": "dev-intern-02",
+    "source": "sample-catfish-runtime"
+  },
+  "projects": [
+    {
+      "project_id": "catfish-core",
+      "label": "Catfish Core",
+      "status": "running",
+      "active_branch": "feature/agent-graph",
+      "owner": "catfish-orchestrator",
+      "active_agents": 3,
+      "pending_reviews": 1,
+      "last_event_at": "2026-03-25T11:58:00Z",
+      "summary": "Main builder wave is comparing orchestration and scoreboard behavior."
+    },
+    {
+      "project_id": "catfish-evals",
+      "label": "Catfish Evals",
+      "status": "staging",
+      "active_branch": "feature/provider-drain",
+      "owner": "eval-supervisor",
+      "active_agents": 2,
+      "pending_reviews": 2,
+      "last_event_at": "2026-03-25T11:57:30Z",
+      "summary": "Evaluation branch is stress-testing quota drain and failover signals."
+    }
+  ],
+  "agents": [
+    {
+      "agent_id": "root-orchestrator",
+      "label": "Root Orchestrator",
+      "role": "orchestrator",
+      "status": "running",
+      "project_id": "catfish-core",
+      "provider_profile": "current-session",
+      "task_kind": "builder",
+      "branch": "feature/agent-graph",
+      "machine_id": "dev-intern-02",
+      "summary": "Owns provider routing and branch scoreboard reconciliation."
+    },
+    {
+      "agent_id": "worker-graph",
+      "label": "Agent Graph Worker",
+      "role": "worker",
+      "status": "running",
+      "project_id": "catfish-core",
+      "provider_profile": "current-session",
+      "task_kind": "builder",
+      "branch": "feature/agent-graph",
+      "parent_id": "root-orchestrator",
+      "machine_id": "dev-intern-02",
+      "summary": "Converts runtime state into a stable hierarchy view model."
+    },
+    {
+      "agent_id": "worker-scoreboard",
+      "label": "Scoreboard Worker",
+      "role": "worker",
+      "status": "review",
+      "project_id": "catfish-core",
+      "provider_profile": "dev02-slot-2",
+      "task_kind": "review",
+      "branch": "feature/scoreboard-refresh",
+      "parent_id": "root-orchestrator",
+      "machine_id": "dev-intern-02",
+      "summary": "Ranks competing branches by experiment score and review state."
+    },
+    {
+      "agent_id": "eval-supervisor",
+      "label": "Eval Supervisor",
+      "role": "monitor",
+      "status": "running",
+      "project_id": "catfish-evals",
+      "provider_profile": "dev02-slot-2",
+      "task_kind": "monitor",
+      "branch": "feature/provider-drain",
+      "machine_id": "dev-intern-02",
+      "summary": "Tracks quota pressure and health regressions across providers."
+    }
+  ],
+  "providers": [
+    {
+      "profile_id": "current-session",
+      "label": "Current Session",
+      "machine_ids": [
+        "pc",
+        "dev-intern-02"
+      ],
+      "available": true,
+      "verified": true,
+      "remaining_credit": 1.0,
+      "reserve_floor": 0.1,
+      "routing_weight": 1.0,
+      "issues": [],
+      "route_tiers": {
+        "quick": {
+          "model": "gpt-5.4"
+        },
+        "balanced": {
+          "model": "gpt-5.4"
+        },
+        "deep": {
+          "model": "gpt-5.4"
+        }
+      }
+    },
+    {
+      "profile_id": "dev02-slot-2",
+      "label": "dev02 Slot 2",
+      "machine_ids": [
+        "dev-intern-02"
+      ],
+      "available": true,
+      "verified": true,
+      "remaining_credit": 0.6,
+      "reserve_floor": 0.1,
+      "routing_weight": 0.8,
+      "issues": [
+        "review-load-high"
+      ],
+      "route_tiers": {
+        "quick": {
+          "model": "gpt-5.4-mini"
+        },
+        "balanced": {
+          "model": "gpt-5.4"
+        },
+        "deep": {
+          "model": "gpt-5.4"
+        }
+      }
+    }
+  ],
+  "branches": [
+    {
+      "branch": "feature/agent-graph",
+      "project_id": "catfish-core",
+      "score": 91.4,
+      "wins": 7,
+      "losses": 1,
+      "state": "leading",
+      "head_commit": "a1b2c3d",
+      "summary": "Strong runtime clarity and low coordination overhead."
+    },
+    {
+      "branch": "feature/scoreboard-refresh",
+      "project_id": "catfish-core",
+      "score": 88.0,
+      "wins": 5,
+      "losses": 2,
+      "state": "contending",
+      "head_commit": "d4e5f6a",
+      "summary": "Better review throughput, slightly weaker stability under load."
+    },
+    {
+      "branch": "feature/provider-drain",
+      "project_id": "catfish-evals",
+      "score": 84.2,
+      "wins": 4,
+      "losses": 3,
+      "state": "staging",
+      "head_commit": "bcdef12",
+      "summary": "Useful for quota visibility but still noisy when profiles flap."
+    }
+  ],
+  "events": [
+    {
+      "event_id": "evt-100",
+      "timestamp": "2026-03-25T11:53:00Z",
+      "level": "info",
+      "kind": "project-sync",
+      "message": "Loaded latest project manifests.",
+      "project_id": "catfish-core"
+    },
+    {
+      "event_id": "evt-101",
+      "timestamp": "2026-03-25T11:54:20Z",
+      "level": "info",
+      "kind": "branch-score",
+      "message": "feature/agent-graph moved into first place.",
+      "project_id": "catfish-core",
+      "branch": "feature/agent-graph"
+    },
+    {
+      "event_id": "evt-102",
+      "timestamp": "2026-03-25T11:55:10Z",
+      "level": "warning",
+      "kind": "provider-health",
+      "message": "Slot 2 quota dipped during review burst.",
+      "project_id": "catfish-evals",
+      "agent_id": "eval-supervisor"
+    },
+    {
+      "event_id": "evt-103",
+      "timestamp": "2026-03-25T11:56:40Z",
+      "level": "info",
+      "kind": "agent-heartbeat",
+      "message": "Agent graph worker heartbeat received.",
+      "project_id": "catfish-core",
+      "agent_id": "worker-graph"
+    },
+    {
+      "event_id": "evt-104",
+      "timestamp": "2026-03-25T11:58:00Z",
+      "level": "info",
+      "kind": "review-queue",
+      "message": "Two scoreboard review tasks remain.",
+      "project_id": "catfish-core",
+      "agent_id": "worker-scoreboard"
+    }
+  ]
+}
