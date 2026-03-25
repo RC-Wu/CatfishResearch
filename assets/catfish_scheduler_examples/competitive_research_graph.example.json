@@ -1,0 +1,316 @@
+{
+  "action_log": [],
+  "branches": {},
+  "created_at": "2026-03-25T00:00:00Z",
+  "graph_id": "example-proj.scheduler",
+  "machine_id": "dev-intern-02",
+  "metadata": {
+    "objective": "Show that all stages start competitive and diversity-aware.",
+    "runtime_root_node_ids": [
+      "root-parent"
+    ],
+    "title": "Competitive Research Example"
+  },
+  "project_budget": {
+    "max_parallel_children": 3,
+    "token_budget": 30000,
+    "usd_budget": 12.0,
+    "wall_time_budget_s": 7200.0
+  },
+  "project_id": "example-proj",
+  "project_usage": {
+    "completion_tokens": 0,
+    "cost_usd": 0.0,
+    "prompt_tokens": 0,
+    "wall_time_s": 0.0
+  },
+  "root_node_id": "project:example-proj",
+  "schema_version": "catfish-scheduler-graph/v1",
+  "stage_order": [
+    "idea",
+    "planning",
+    "implementation",
+    "evaluation",
+    "writing",
+    "figure"
+  ],
+  "stages": {
+    "evaluation": {
+      "agent_groups": [
+        "benchmark-panel",
+        "repro-checkers",
+        "error-analysis"
+      ],
+      "branch_ids": [],
+      "budget_ceiling": {
+        "max_parallel_children": 3,
+        "token_budget": 4800,
+        "usd_budget": 1.92,
+        "wall_time_budget_s": 1152.0
+      },
+      "competition_mode": "top-k",
+      "difficulty": "medium",
+      "diversity_targets": {
+        "agent_group_min_distinct": 2,
+        "collapse_penalty": 0.2,
+        "expand_bonus": 0.25,
+        "max_stack_share": 0.6,
+        "model_min_distinct": 2,
+        "novel_stack_bonus": 0.12,
+        "provider_min_distinct": 2,
+        "replay_bonus": 0.18,
+        "style_min_distinct": 2
+      },
+      "label": "Evaluation Competition",
+      "max_survivors": 2,
+      "metadata": {},
+      "min_competitors": 2,
+      "parent_node_id": "root-parent",
+      "prune_below_score": 0.4,
+      "replay_cap": 2,
+      "review_required": true,
+      "routing_task_category": "review",
+      "selected_branch_ids": [],
+      "stage_id": "evaluation",
+      "stage_kind": "evaluation",
+      "status": "active",
+      "styles": [
+        "coverage-first",
+        "skeptical",
+        "quantitative"
+      ],
+      "target_frontier_width": 3
+    },
+    "figure": {
+      "agent_groups": [
+        "chart-lab",
+        "grayscale-review",
+        "caption-crafter"
+      ],
+      "branch_ids": [],
+      "budget_ceiling": {
+        "max_parallel_children": 3,
+        "token_budget": 3600,
+        "usd_budget": 1.44,
+        "wall_time_budget_s": 864.0
+      },
+      "competition_mode": "top-k",
+      "difficulty": "low",
+      "diversity_targets": {
+        "agent_group_min_distinct": 2,
+        "collapse_penalty": 0.2,
+        "expand_bonus": 0.25,
+        "max_stack_share": 0.6,
+        "model_min_distinct": 2,
+        "novel_stack_bonus": 0.12,
+        "provider_min_distinct": 2,
+        "replay_bonus": 0.18,
+        "style_min_distinct": 2
+      },
+      "label": "Figure Competition",
+      "max_survivors": 2,
+      "metadata": {},
+      "min_competitors": 2,
+      "parent_node_id": "root-parent",
+      "prune_below_score": 0.35,
+      "replay_cap": 2,
+      "review_required": true,
+      "routing_task_category": "builder",
+      "selected_branch_ids": [],
+      "stage_id": "figure",
+      "stage_kind": "figure",
+      "status": "active",
+      "styles": [
+        "minimal",
+        "annotation-heavy",
+        "paper-ready"
+      ],
+      "target_frontier_width": 3
+    },
+    "idea": {
+      "agent_groups": [
+        "divergent-lab",
+        "skeptic-cell",
+        "literature-scouts"
+      ],
+      "branch_ids": [],
+      "budget_ceiling": {
+        "max_parallel_children": 3,
+        "token_budget": 4800,
+        "usd_budget": 1.92,
+        "wall_time_budget_s": 1152.0
+      },
+      "competition_mode": "top-k",
+      "difficulty": "high",
+      "diversity_targets": {
+        "agent_group_min_distinct": 2,
+        "collapse_penalty": 0.2,
+        "expand_bonus": 0.25,
+        "max_stack_share": 0.6,
+        "model_min_distinct": 2,
+        "novel_stack_bonus": 0.12,
+        "provider_min_distinct": 2,
+        "replay_bonus": 0.18,
+        "style_min_distinct": 2
+      },
+      "label": "Idea Competition",
+      "max_survivors": 2,
+      "metadata": {},
+      "min_competitors": 3,
+      "parent_node_id": "root-parent",
+      "prune_below_score": 0.3,
+      "replay_cap": 2,
+      "review_required": true,
+      "routing_task_category": "research",
+      "selected_branch_ids": [],
+      "stage_id": "idea",
+      "stage_kind": "idea",
+      "status": "active",
+      "styles": [
+        "analytical",
+        "contrarian",
+        "systems"
+      ],
+      "target_frontier_width": 4
+    },
+    "implementation": {
+      "agent_groups": [
+        "builder-pair",
+        "patch-racer",
+        "builder-reviewer"
+      ],
+      "branch_ids": [],
+      "budget_ceiling": {
+        "max_parallel_children": 3,
+        "token_budget": 8400,
+        "usd_budget": 3.36,
+        "wall_time_budget_s": 2016.0
+      },
+      "competition_mode": "top-k",
+      "difficulty": "medium",
+      "diversity_targets": {
+        "agent_group_min_distinct": 2,
+        "collapse_penalty": 0.2,
+        "expand_bonus": 0.25,
+        "max_stack_share": 0.6,
+        "model_min_distinct": 2,
+        "novel_stack_bonus": 0.12,
+        "provider_min_distinct": 2,
+        "replay_bonus": 0.18,
+        "style_min_distinct": 2
+      },
+      "label": "Implementation Competition",
+      "max_survivors": 2,
+      "metadata": {},
+      "min_competitors": 2,
+      "parent_node_id": "root-parent",
+      "prune_below_score": 0.4,
+      "replay_cap": 3,
+      "review_required": true,
+      "routing_task_category": "builder",
+      "selected_branch_ids": [],
+      "stage_id": "implementation",
+      "stage_kind": "implementation",
+      "status": "active",
+      "styles": [
+        "minimal-diff",
+        "refactor-first",
+        "test-first"
+      ],
+      "target_frontier_width": 3
+    },
+    "planning": {
+      "agent_groups": [
+        "planner-critic",
+        "resource-auditors",
+        "ops-checkers"
+      ],
+      "branch_ids": [],
+      "budget_ceiling": {
+        "max_parallel_children": 3,
+        "token_budget": 4200,
+        "usd_budget": 1.68,
+        "wall_time_budget_s": 1008.0
+      },
+      "competition_mode": "top-k",
+      "difficulty": "medium",
+      "diversity_targets": {
+        "agent_group_min_distinct": 2,
+        "collapse_penalty": 0.2,
+        "expand_bonus": 0.25,
+        "max_stack_share": 0.6,
+        "model_min_distinct": 2,
+        "novel_stack_bonus": 0.12,
+        "provider_min_distinct": 2,
+        "replay_bonus": 0.18,
+        "style_min_distinct": 2
+      },
+      "label": "Planning Competition",
+      "max_survivors": 2,
+      "metadata": {},
+      "min_competitors": 2,
+      "parent_node_id": "root-parent",
+      "prune_below_score": 0.35,
+      "replay_cap": 2,
+      "review_required": true,
+      "routing_task_category": "research",
+      "selected_branch_ids": [],
+      "stage_id": "planning",
+      "stage_kind": "planning",
+      "status": "active",
+      "styles": [
+        "outline-first",
+        "risk-first",
+        "evidence-first"
+      ],
+      "target_frontier_width": 3
+    },
+    "writing": {
+      "agent_groups": [
+        "drafting-pair",
+        "structure-editor",
+        "claim-auditor"
+      ],
+      "branch_ids": [],
+      "budget_ceiling": {
+        "max_parallel_children": 3,
+        "token_budget": 4200,
+        "usd_budget": 1.68,
+        "wall_time_budget_s": 1008.0
+      },
+      "competition_mode": "top-k",
+      "difficulty": "medium",
+      "diversity_targets": {
+        "agent_group_min_distinct": 2,
+        "collapse_penalty": 0.2,
+        "expand_bonus": 0.25,
+        "max_stack_share": 0.6,
+        "model_min_distinct": 2,
+        "novel_stack_bonus": 0.12,
+        "provider_min_distinct": 2,
+        "replay_bonus": 0.18,
+        "style_min_distinct": 2
+      },
+      "label": "Writing Competition",
+      "max_survivors": 2,
+      "metadata": {},
+      "min_competitors": 2,
+      "parent_node_id": "root-parent",
+      "prune_below_score": 0.35,
+      "replay_cap": 2,
+      "review_required": true,
+      "routing_task_category": "summary",
+      "selected_branch_ids": [],
+      "stage_id": "writing",
+      "stage_kind": "writing",
+      "status": "active",
+      "styles": [
+        "narrative",
+        "dense-technical",
+        "claim-led"
+      ],
+      "target_frontier_width": 3
+    }
+  },
+  "updated_at": "2026-03-25T00:00:00Z"
+}
