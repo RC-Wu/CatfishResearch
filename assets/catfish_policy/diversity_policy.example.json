@@ -1,0 +1,1221 @@
+{
+  "schemaVersion": "catfish.diversity-policy.v1",
+  "policyId": "catfish-diversity-policy-20260325",
+  "updatedAt": "2026-03-25T00:00:00Z",
+  "axisDefinitions": {
+    "provider": {
+      "description": "Provider, gateway, or account route used by a candidate bundle."
+    },
+    "model": {
+      "description": "Model family and reasoning tier used by a candidate bundle."
+    },
+    "prompt_style": {
+      "description": "Prompt family or instruction dialect such as divergent, skeptical, checklist, or deterministic."
+    },
+    "agent_role": {
+      "description": "Role identity such as scout, planner, builder, critic, evaluator, writer, plotter, router, or allocator."
+    },
+    "group_strategy": {
+      "description": "Team topology such as solo, builder-plus-critic, paired judges, or swarm-plus-integrator."
+    },
+    "evidence_type": {
+      "description": "Evidence family such as tests, benchmark metrics, novelty checks, provenance audits, or holdout review."
+    }
+  },
+  "references": [
+    {
+      "id": "catfish-architecture",
+      "kind": "internal-doc",
+      "label": "Catfish Effect System Architecture",
+      "path": "docs/catfish/ARCHITECTURE_20260325.md",
+      "use": "stage-agnostic competition, capability metadata, and graph scheduling invariants"
+    },
+    {
+      "id": "catfish-scoring",
+      "kind": "internal-doc",
+      "label": "Catfish Scoring And Competition",
+      "path": "docs/catfish/SCORING_AND_COMPETITION_20260325.md",
+      "use": "parent-owned scorecards and advancement modes"
+    },
+    {
+      "id": "catfish-routing",
+      "kind": "internal-doc",
+      "label": "CatfishResearch Provider Routing",
+      "path": "docs/catfish/PROVIDER_ROUTING_20260325.md",
+      "use": "provider-health-aware route selection and capability memory"
+    },
+    {
+      "id": "promptfoo",
+      "kind": "external-repo",
+      "url": "https://github.com/promptfoo/promptfoo",
+      "use": "declarative eval matrices, side-by-side model comparison, and CI-style gating"
+    },
+    {
+      "id": "openai-evals",
+      "kind": "external-repo",
+      "url": "https://github.com/openai/evals",
+      "use": "reusable benchmark and eval-template patterns"
+    },
+    {
+      "id": "inspect-ai",
+      "kind": "external-repo",
+      "url": "https://github.com/UKGovernmentBEIS/inspect_ai",
+      "use": "tool-using and model-graded evaluation components"
+    },
+    {
+      "id": "litellm",
+      "kind": "external-repo",
+      "url": "https://github.com/BerriAI/litellm",
+      "use": "provider and model routing bundles with fallback and cost signals"
+    },
+    {
+      "id": "langgraph",
+      "kind": "external-repo",
+      "url": "https://github.com/langchain-ai/langgraph",
+      "use": "durable graph execution and explicit intervention points"
+    },
+    {
+      "id": "autogen",
+      "kind": "external-repo",
+      "url": "https://github.com/microsoft/autogen",
+      "use": "first-class roles and multi-agent orchestration patterns"
+    },
+    {
+      "id": "metagpt",
+      "kind": "external-repo",
+      "url": "https://github.com/FoundationAgents/MetaGPT",
+      "use": "stage-specific SOP style decomposition across planning and implementation"
+    },
+    {
+      "id": "crewai",
+      "kind": "external-repo",
+      "url": "https://github.com/crewAIInc/crewAI",
+      "use": "crew topology and event-oriented flow ideas"
+    },
+    {
+      "id": "openhands",
+      "kind": "external-repo",
+      "url": "https://github.com/OpenHands/OpenHands",
+      "use": "coding-agent execution and scalable implementation workers"
+    },
+    {
+      "id": "langfuse",
+      "kind": "external-repo",
+      "url": "https://github.com/langfuse/langfuse",
+      "use": "traceable evidence, metrics, datasets, and eval observability"
+    },
+    {
+      "id": "d2",
+      "kind": "external-repo",
+      "url": "https://github.com/terrastruct/d2",
+      "use": "reproducible figure and diagram specifications"
+    },
+    {
+      "id": "agentskills",
+      "kind": "external-repo",
+      "url": "https://github.com/agentskills/agentskills",
+      "use": "machine-readable packaging expectations"
+    }
+  ],
+  "stages": {
+    "idea": {
+      "stageId": "idea",
+      "stageClass": "research-frontier",
+      "continuousControl": false,
+      "competitionUnit": "idea bundle",
+      "primaryAdvancement": "top-k-survival+wildcard",
+      "explorationPolicy": {
+        "objective": "maximize hypothesis and workflow coverage",
+        "frontierIntent": "broad-search",
+        "competitionMode": "top-k-survival",
+        "candidateCount": 8,
+        "advanceCount": 3,
+        "wildcardCount": 1,
+        "axisCoverage": {
+          "provider": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "allow-single-healthy-provider"
+          },
+          "model": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "allow-single-verified-model"
+          },
+          "prompt_style": {
+            "priority": "primary",
+            "targetDistinct": 4,
+            "minDistinct": 3,
+            "fallback": "merge-nearby-styles-only-after-wildcard-is-kept"
+          },
+          "agent_role": {
+            "priority": "primary",
+            "targetDistinct": 4,
+            "minDistinct": 3,
+            "fallback": "keep-scout-critic-integrator-coverage"
+          },
+          "group_strategy": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "retain-one-solo-and-one-team-candidate"
+          },
+          "evidence_type": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "retain-one-novelty-and-one-feasibility-evidence-path"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "problem-brief",
+          "novelty-check",
+          "baseline-gap",
+          "feasibility-estimate"
+        ]
+      },
+      "evaluationPolicy": {
+        "objective": "challenge ideas with independent novelty and tractability checks",
+        "frontierIntent": "independent-gating",
+        "competitionMode": "winner-take-all",
+        "candidateCount": 3,
+        "advanceCount": 1,
+        "wildcardCount": 0,
+        "axisCoverage": {
+          "provider": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "record-provider-degradation-explicitly"
+          },
+          "model": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "record-model-degradation-explicitly"
+          },
+          "prompt_style": {
+            "priority": "primary",
+            "targetDistinct": 2,
+            "minDistinct": 2,
+            "fallback": "use-skeptical-and-analytic-judge-styles"
+          },
+          "agent_role": {
+            "priority": "primary",
+            "targetDistinct": 2,
+            "minDistinct": 2,
+            "fallback": "separate-proposer-and-critic-roles"
+          },
+          "group_strategy": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "prefer-paired-judge-over-solo-judge"
+          },
+          "evidence_type": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "require-novelty-and-feasibility-even-if-provider-collapses"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "novelty-check",
+          "feasibility-estimate",
+          "baseline-gap"
+        ]
+      },
+      "collapsePolicy": {
+        "allowFrontierNarrowing": true,
+        "whenAll": [
+          "parent_score_gte_0.80",
+          "independent_evidence_types_gte_2",
+          "risk_lte_0.35"
+        ],
+        "retainDiversityOn": [
+          "agent_role",
+          "evidence_type"
+        ]
+      }
+    },
+    "planning": {
+      "stageId": "planning",
+      "stageClass": "execution-design",
+      "continuousControl": false,
+      "competitionUnit": "execution plan bundle",
+      "primaryAdvancement": "top-k-survival",
+      "explorationPolicy": {
+        "objective": "compare sequencing strategies and risk decompositions",
+        "frontierIntent": "broad-search",
+        "competitionMode": "top-k-survival",
+        "candidateCount": 5,
+        "advanceCount": 2,
+        "wildcardCount": 1,
+        "axisCoverage": {
+          "provider": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "degrade-to-one-healthy-provider"
+          },
+          "model": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "degrade-to-one-verified-model"
+          },
+          "prompt_style": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "keep-checklist-and-skeptic-plan-styles"
+          },
+          "agent_role": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "retain-planner-and-risk-critic"
+          },
+          "group_strategy": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "retain-one-integrator-style-team"
+          },
+          "evidence_type": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "require-risk-and-verification-evidence"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "milestone-plan",
+          "dependency-risk",
+          "verification-path"
+        ]
+      },
+      "evaluationPolicy": {
+        "objective": "promote the plan with the best implementation fitness and auditability",
+        "frontierIntent": "independent-gating",
+        "competitionMode": "winner-take-all",
+        "candidateCount": 2,
+        "advanceCount": 1,
+        "wildcardCount": 0,
+        "axisCoverage": {
+          "provider": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "record-provider-degradation-explicitly"
+          },
+          "model": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "record-model-degradation-explicitly"
+          },
+          "prompt_style": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "prefer-independent-plan-audit-template"
+          },
+          "agent_role": {
+            "priority": "primary",
+            "targetDistinct": 2,
+            "minDistinct": 2,
+            "fallback": "separate-plan-author-and-plan-auditor"
+          },
+          "group_strategy": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "prefer-paired-audit-if-budget-allows"
+          },
+          "evidence_type": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "require-dependency-risk-and-verification-evidence"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "milestone-plan",
+          "dependency-risk",
+          "implementation-fitness"
+        ]
+      },
+      "collapsePolicy": {
+        "allowFrontierNarrowing": true,
+        "whenAll": [
+          "parent_score_gte_0.82",
+          "independent_evidence_types_gte_2",
+          "downstream_testability_confirmed"
+        ],
+        "retainDiversityOn": [
+          "evidence_type"
+        ]
+      }
+    },
+    "implementation": {
+      "stageId": "implementation",
+      "stageClass": "artifact-build",
+      "continuousControl": false,
+      "competitionUnit": "patch bundle",
+      "primaryAdvancement": "merge-then-re-score",
+      "explorationPolicy": {
+        "objective": "compare builder ecologies while preserving executable proof",
+        "frontierIntent": "focused-search",
+        "competitionMode": "top-k-survival",
+        "candidateCount": 4,
+        "advanceCount": 2,
+        "wildcardCount": 0,
+        "axisCoverage": {
+          "provider": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "degrade-to-one-healthy-provider"
+          },
+          "model": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "degrade-to-one-verified-model"
+          },
+          "prompt_style": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "retain-one-deterministic-patch-template"
+          },
+          "agent_role": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "retain-builder-and-critic"
+          },
+          "group_strategy": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "retain-solo-and-builder-plus-critic"
+          },
+          "evidence_type": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "require-tests-and-repro-or-static-checks"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "unit-tests",
+          "integration-tests",
+          "static-checks",
+          "repro-steps"
+        ]
+      },
+      "evaluationPolicy": {
+        "objective": "promote only patches that survive independent executable review",
+        "frontierIntent": "independent-gating",
+        "competitionMode": "winner-take-all",
+        "candidateCount": 2,
+        "advanceCount": 1,
+        "wildcardCount": 0,
+        "axisCoverage": {
+          "provider": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "allow-same-provider-if-no-healthy-alternative"
+          },
+          "model": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "allow-same-model-if-no-verified-alternative"
+          },
+          "prompt_style": {
+            "priority": "fixed",
+            "targetDistinct": 1,
+            "minDistinct": 1,
+            "fallback": "use-deterministic-review-template"
+          },
+          "agent_role": {
+            "priority": "primary",
+            "targetDistinct": 2,
+            "minDistinct": 2,
+            "fallback": "keep-builder-separate-from-reviewer"
+          },
+          "group_strategy": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "prefer-builder-plus-holdout-reviewer"
+          },
+          "evidence_type": {
+            "priority": "primary",
+            "targetDistinct": 4,
+            "minDistinct": 3,
+            "fallback": "require-two-executable-evidence-paths-plus-risk-note"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "unit-tests",
+          "integration-tests",
+          "static-checks",
+          "risk-review"
+        ]
+      },
+      "collapsePolicy": {
+        "allowFrontierNarrowing": true,
+        "whenAll": [
+          "repeated_parent_wins_gte_2",
+          "all_required_tests_passing",
+          "rework_risk_lte_0.25"
+        ],
+        "retainDiversityOn": [
+          "provider",
+          "model",
+          "evidence_type"
+        ]
+      }
+    },
+    "experiment": {
+      "stageId": "experiment",
+      "stageClass": "empirical-validation",
+      "continuousControl": false,
+      "competitionUnit": "experiment plan or result bundle",
+      "primaryAdvancement": "top-k-survival",
+      "explorationPolicy": {
+        "objective": "compare ablations, benchmark slices, and analysis prompts",
+        "frontierIntent": "broad-search",
+        "competitionMode": "top-k-survival",
+        "candidateCount": 4,
+        "advanceCount": 2,
+        "wildcardCount": 0,
+        "axisCoverage": {
+          "provider": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "degrade-to-one-healthy-provider"
+          },
+          "model": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "degrade-to-one-verified-model"
+          },
+          "prompt_style": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "keep-analysis-and-ablation-design-styles"
+          },
+          "agent_role": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "retain-experimenter-and-skeptic"
+          },
+          "group_strategy": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "retain-one-integrator-topology"
+          },
+          "evidence_type": {
+            "priority": "primary",
+            "targetDistinct": 4,
+            "minDistinct": 3,
+            "fallback": "require-metric-plus-provenance-and-one-rerun-path"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "benchmark-metric",
+          "ablation-table",
+          "run-provenance",
+          "rerun-plan"
+        ]
+      },
+      "evaluationPolicy": {
+        "objective": "promote only effects that survive independent quantitative and reproducibility checks",
+        "frontierIntent": "independent-gating",
+        "competitionMode": "merge-then-re-score",
+        "candidateCount": 2,
+        "advanceCount": 1,
+        "wildcardCount": 0,
+        "axisCoverage": {
+          "provider": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "record-provider-degradation-explicitly"
+          },
+          "model": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "record-model-degradation-explicitly"
+          },
+          "prompt_style": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "prefer-independent-analysis-template"
+          },
+          "agent_role": {
+            "priority": "primary",
+            "targetDistinct": 2,
+            "minDistinct": 2,
+            "fallback": "separate-run-owner-and-result-auditor"
+          },
+          "group_strategy": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "prefer-paired-audit"
+          },
+          "evidence_type": {
+            "priority": "primary",
+            "targetDistinct": 4,
+            "minDistinct": 3,
+            "fallback": "require-metric-and-rerun-or-holdout"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "benchmark-metric",
+          "rerun-result",
+          "holdout-slice",
+          "run-provenance"
+        ]
+      },
+      "collapsePolicy": {
+        "allowFrontierNarrowing": true,
+        "whenAll": [
+          "independent_rerun_passed",
+          "holdout_or_seed_sweep_completed",
+          "risk_lte_0.30"
+        ],
+        "retainDiversityOn": [
+          "evidence_type"
+        ]
+      }
+    },
+    "evaluation": {
+      "stageId": "evaluation",
+      "stageClass": "gatekeeping",
+      "continuousControl": false,
+      "competitionUnit": "evaluation bundle",
+      "primaryAdvancement": "winner-take-all",
+      "explorationPolicy": {
+        "objective": "compare rubric structures and judge ecologies",
+        "frontierIntent": "broad-search",
+        "competitionMode": "top-k-survival",
+        "candidateCount": 3,
+        "advanceCount": 2,
+        "wildcardCount": 0,
+        "axisCoverage": {
+          "provider": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "degrade-to-one-healthy-provider"
+          },
+          "model": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "degrade-to-one-verified-model"
+          },
+          "prompt_style": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "keep-analytic-and-adversarial-judge-styles"
+          },
+          "agent_role": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "retain-judge-and-failure-miner"
+          },
+          "group_strategy": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "retain-paired-judge-or-red-team"
+          },
+          "evidence_type": {
+            "priority": "primary",
+            "targetDistinct": 4,
+            "minDistinct": 3,
+            "fallback": "require-benchmark-plus-trace-or-failure-sample"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "benchmark",
+          "trace-audit",
+          "failure-sample",
+          "model-graded-review"
+        ]
+      },
+      "evaluationPolicy": {
+        "objective": "produce a scorecard that is independent from the artifact builder",
+        "frontierIntent": "independent-gating",
+        "competitionMode": "winner-take-all",
+        "candidateCount": 2,
+        "advanceCount": 1,
+        "wildcardCount": 0,
+        "axisCoverage": {
+          "provider": {
+            "priority": "primary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "record-provider-degradation-explicitly"
+          },
+          "model": {
+            "priority": "primary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "record-model-degradation-explicitly"
+          },
+          "prompt_style": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "use-independent-judge-template"
+          },
+          "agent_role": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "retain-judge-and-auditor-separation"
+          },
+          "group_strategy": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "prefer-paired-judge-topology"
+          },
+          "evidence_type": {
+            "priority": "primary",
+            "targetDistinct": 4,
+            "minDistinct": 3,
+            "fallback": "never-collapse-to-one-evidence-type"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "benchmark",
+          "trace-audit",
+          "failure-sample",
+          "holdout-review"
+        ]
+      },
+      "collapsePolicy": {
+        "allowFrontierNarrowing": true,
+        "whenAll": [
+          "single-healthy-route-or-budget-emergency",
+          "evidence_types_gte_3",
+          "degradation_reason_recorded"
+        ],
+        "retainDiversityOn": [
+          "evidence_type",
+          "provider",
+          "model"
+        ]
+      }
+    },
+    "writing": {
+      "stageId": "writing",
+      "stageClass": "artifact-packaging",
+      "continuousControl": false,
+      "competitionUnit": "section draft bundle",
+      "primaryAdvancement": "merge-then-re-score",
+      "explorationPolicy": {
+        "objective": "compare drafting and editing strategies while preserving evidence links",
+        "frontierIntent": "focused-search",
+        "competitionMode": "top-k-survival",
+        "candidateCount": 4,
+        "advanceCount": 2,
+        "wildcardCount": 0,
+        "axisCoverage": {
+          "provider": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "degrade-to-one-healthy-provider"
+          },
+          "model": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "degrade-to-one-verified-model"
+          },
+          "prompt_style": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "keep-outline-first-and-evidence-first-styles"
+          },
+          "agent_role": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "retain-author-and-skeptic-editor"
+          },
+          "group_strategy": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "prefer-author-plus-editor"
+          },
+          "evidence_type": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "require-artifact-refs-and-citation-checks"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "artifact-ref",
+          "scorecard-ref",
+          "citation-check"
+        ]
+      },
+      "evaluationPolicy": {
+        "objective": "promote coherent writing without dropping factual grounding",
+        "frontierIntent": "independent-gating",
+        "competitionMode": "winner-take-all",
+        "candidateCount": 2,
+        "advanceCount": 1,
+        "wildcardCount": 0,
+        "axisCoverage": {
+          "provider": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "allow-same-provider-if-no-alternative"
+          },
+          "model": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "allow-same-model-if-no-alternative"
+          },
+          "prompt_style": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "prefer-factual-audit-template"
+          },
+          "agent_role": {
+            "priority": "primary",
+            "targetDistinct": 2,
+            "minDistinct": 2,
+            "fallback": "separate-author-and-factual-reviewer"
+          },
+          "group_strategy": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "prefer-author-plus-auditor"
+          },
+          "evidence_type": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "require-artifact-links-even-after-style-collapse"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "artifact-ref",
+          "factual-audit",
+          "citation-check"
+        ]
+      },
+      "collapsePolicy": {
+        "allowFrontierNarrowing": true,
+        "whenAll": [
+          "consistency_gain_gte_cost_of_extra_search",
+          "factual_review_passed",
+          "risk_lte_0.30"
+        ],
+        "retainDiversityOn": [
+          "agent_role",
+          "evidence_type"
+        ]
+      }
+    },
+    "figures": {
+      "stageId": "figures",
+      "stageClass": "artifact-packaging",
+      "continuousControl": false,
+      "competitionUnit": "figure bundle",
+      "primaryAdvancement": "merge-then-re-score",
+      "explorationPolicy": {
+        "objective": "compare renderers and layout strategies from the same underlying data",
+        "frontierIntent": "focused-search",
+        "competitionMode": "top-k-survival",
+        "candidateCount": 4,
+        "advanceCount": 2,
+        "wildcardCount": 0,
+        "axisCoverage": {
+          "provider": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "degrade-to-one-healthy-provider"
+          },
+          "model": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "degrade-to-one-verified-model"
+          },
+          "prompt_style": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "keep-one-structured-render-spec-and-one-editorial-layout-style"
+          },
+          "agent_role": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "retain-plotter-and-faithfulness-auditor"
+          },
+          "group_strategy": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "prefer-renderer-plus-caption-reviewer"
+          },
+          "evidence_type": {
+            "priority": "primary",
+            "targetDistinct": 4,
+            "minDistinct": 3,
+            "fallback": "require-provenance-plus-readability-and-caption-audit"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "data-provenance",
+          "caption-draft",
+          "grayscale-readability",
+          "paper-export-fit"
+        ]
+      },
+      "evaluationPolicy": {
+        "objective": "promote faithful figures instead of merely attractive ones",
+        "frontierIntent": "independent-gating",
+        "competitionMode": "winner-take-all",
+        "candidateCount": 2,
+        "advanceCount": 1,
+        "wildcardCount": 0,
+        "axisCoverage": {
+          "provider": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "allow-same-provider-if-no-alternative"
+          },
+          "model": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "allow-same-model-if-no-alternative"
+          },
+          "prompt_style": {
+            "priority": "fixed",
+            "targetDistinct": 1,
+            "minDistinct": 1,
+            "fallback": "use-deterministic-figure-audit-template"
+          },
+          "agent_role": {
+            "priority": "primary",
+            "targetDistinct": 2,
+            "minDistinct": 2,
+            "fallback": "separate-renderer-and-faithfulness-auditor"
+          },
+          "group_strategy": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "prefer-caption-audit-sidecar"
+          },
+          "evidence_type": {
+            "priority": "primary",
+            "targetDistinct": 4,
+            "minDistinct": 3,
+            "fallback": "require-provenance-and-caption-audit-even-after-render-collapse"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "data-provenance",
+          "caption-audit",
+          "axis-label-check",
+          "grayscale-readability"
+        ]
+      },
+      "collapsePolicy": {
+        "allowFrontierNarrowing": true,
+        "whenAll": [
+          "faithfulness_checks_passing",
+          "caption_audit_passing",
+          "style_consistency_needed"
+        ],
+        "retainDiversityOn": [
+          "agent_role",
+          "evidence_type"
+        ]
+      }
+    },
+    "routing": {
+      "stageId": "routing",
+      "stageClass": "control-plane",
+      "continuousControl": true,
+      "competitionUnit": "route bundle",
+      "primaryAdvancement": "winner-take-all",
+      "explorationPolicy": {
+        "objective": "probe route alternatives when health and cost allow",
+        "frontierIntent": "health-constrained-search",
+        "competitionMode": "replay-under-constraint-shift",
+        "candidateCount": 3,
+        "advanceCount": 1,
+        "wildcardCount": 0,
+        "axisCoverage": {
+          "provider": {
+            "priority": "primary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "degrade-to-one-healthy-provider"
+          },
+          "model": {
+            "priority": "primary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "degrade-to-one-verified-model"
+          },
+          "prompt_style": {
+            "priority": "fixed",
+            "targetDistinct": 1,
+            "minDistinct": 1,
+            "fallback": "use-deterministic-route-brief"
+          },
+          "agent_role": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "retain-router-and-parent-reviewer-separation"
+          },
+          "group_strategy": {
+            "priority": "fixed",
+            "targetDistinct": 1,
+            "minDistinct": 1,
+            "fallback": "single-router-plus-parent-approval"
+          },
+          "evidence_type": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "require-health-and-ledger-evidence"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "provider-health",
+          "capability-ledger",
+          "parent-score"
+        ]
+      },
+      "evaluationPolicy": {
+        "objective": "use the most reliable route compatible with stage value and independence needs",
+        "frontierIntent": "stable-selection",
+        "competitionMode": "winner-take-all",
+        "candidateCount": 2,
+        "advanceCount": 1,
+        "wildcardCount": 0,
+        "axisCoverage": {
+          "provider": {
+            "priority": "primary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "record-forced-route-collapse"
+          },
+          "model": {
+            "priority": "primary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "record-forced-model-collapse"
+          },
+          "prompt_style": {
+            "priority": "fixed",
+            "targetDistinct": 1,
+            "minDistinct": 1,
+            "fallback": "use-deterministic-route-brief"
+          },
+          "agent_role": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "keep-parent-approval"
+          },
+          "group_strategy": {
+            "priority": "fixed",
+            "targetDistinct": 1,
+            "minDistinct": 1,
+            "fallback": "single-router-plus-parent-approval"
+          },
+          "evidence_type": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "require-health-and-ledger-evidence"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "provider-health",
+          "capability-ledger",
+          "recent-scorecard"
+        ]
+      },
+      "collapsePolicy": {
+        "allowFrontierNarrowing": true,
+        "whenAll": [
+          "healthy_routes_lte_1_or_quota_pressure_high",
+          "route_choice_recorded",
+          "late_stage_or_repeated_route_win"
+        ],
+        "retainDiversityOn": [
+          "provider",
+          "model",
+          "evidence_type"
+        ]
+      }
+    },
+    "resource_allocation": {
+      "stageId": "resource_allocation",
+      "stageClass": "control-plane",
+      "continuousControl": true,
+      "competitionUnit": "allocation bundle",
+      "primaryAdvancement": "winner-take-all",
+      "explorationPolicy": {
+        "objective": "compare frontier widths and retry strategies under shared budgets",
+        "frontierIntent": "portfolio-search",
+        "competitionMode": "top-k-survival",
+        "candidateCount": 3,
+        "advanceCount": 1,
+        "wildcardCount": 1,
+        "axisCoverage": {
+          "provider": {
+            "priority": "fixed",
+            "targetDistinct": 1,
+            "minDistinct": 1,
+            "fallback": "provider-diversity-handled-by-routing-stage"
+          },
+          "model": {
+            "priority": "fixed",
+            "targetDistinct": 1,
+            "minDistinct": 1,
+            "fallback": "model-diversity-handled-by-routing-stage"
+          },
+          "prompt_style": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "keep-one-conservative-and-one-aggressive-allocation-template"
+          },
+          "agent_role": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "retain-allocator-and-parent-reviewer"
+          },
+          "group_strategy": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "retain-wide-search-and-focused-search-policies"
+          },
+          "evidence_type": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "require-spend-and-reward-telemetry"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "spend-telemetry",
+          "occupancy-telemetry",
+          "realized-reward"
+        ]
+      },
+      "evaluationPolicy": {
+        "objective": "promote the budget strategy with the best realized reward and acceptable fairness",
+        "frontierIntent": "stable-selection",
+        "competitionMode": "winner-take-all",
+        "candidateCount": 2,
+        "advanceCount": 1,
+        "wildcardCount": 0,
+        "axisCoverage": {
+          "provider": {
+            "priority": "fixed",
+            "targetDistinct": 1,
+            "minDistinct": 1,
+            "fallback": "provider-diversity-handled-by-routing-stage"
+          },
+          "model": {
+            "priority": "fixed",
+            "targetDistinct": 1,
+            "minDistinct": 1,
+            "fallback": "model-diversity-handled-by-routing-stage"
+          },
+          "prompt_style": {
+            "priority": "fixed",
+            "targetDistinct": 1,
+            "minDistinct": 1,
+            "fallback": "use-deterministic-budget-review-template"
+          },
+          "agent_role": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "retain-allocator-and-parent-reviewer"
+          },
+          "group_strategy": {
+            "priority": "secondary",
+            "targetDistinct": 2,
+            "minDistinct": 1,
+            "fallback": "retain-one-reserve-lane-policy"
+          },
+          "evidence_type": {
+            "priority": "primary",
+            "targetDistinct": 3,
+            "minDistinct": 2,
+            "fallback": "require-realized-reward-and-spend-even-after-policy-collapse"
+          }
+        },
+        "requiredEvidenceTypes": [
+          "spend-telemetry",
+          "realized-reward",
+          "fairness-audit"
+        ]
+      },
+      "collapsePolicy": {
+        "allowFrontierNarrowing": true,
+        "whenAll": [
+          "reward_per_cost_dominance_confirmed",
+          "queue_pressure_under_control",
+          "reserve_lane_retained"
+        ],
+        "retainDiversityOn": [
+          "group_strategy",
+          "evidence_type"
+        ]
+      }
+    }
+  }
+}
