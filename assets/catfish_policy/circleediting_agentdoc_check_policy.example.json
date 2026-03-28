@@ -1,0 +1,118 @@
+{
+  "schemaVersion": "catfish.agentdoc-check-policy.v1",
+  "policyId": "circleediting-3d-agentdoc-policy-20260328",
+  "projectId": "circleediting-3d-edit",
+  "updatedAt": "2026-03-28T00:00:00Z",
+  "ownerNodeId": "circle3d-agentdoc-monitor",
+  "externalAgentDocRoot": "/dev_vepfs/rc_wu/AgentDoc",
+  "purpose": "Keep CircleEditing 3d-edit work aligned with external AgentDoc procedures while Catfish remains the local supervisor.",
+  "cadence": {
+    "heartbeatCheckEveryMinutes": 45,
+    "staleAfterMinutes": 60,
+    "forceCheckOn": [
+      "stage-transition",
+      "resource-escalation",
+      "resource-denial",
+      "workspace-root-change",
+      "before-merge",
+      "after-incident"
+    ]
+  },
+  "requiredChecks": [
+    {
+      "checkId": "startup-before-stage",
+      "when": "before the first task in each stage",
+      "requiredEvidence": [
+        "Prompt.md variant used",
+        "machine routing confirmation",
+        "workspace write-boundary confirmation"
+      ]
+    },
+    {
+      "checkId": "pre-resource-request",
+      "when": "before any request for GPU, vePFS, CPU, or CircleEditing write access",
+      "requiredEvidence": [
+        "latest AgentDoc receipt id",
+        "approved workspace root",
+        "storage-preflight confirmation"
+      ]
+    },
+    {
+      "checkId": "post-denial-recheck",
+      "when": "immediately after a resource denial and before retry",
+      "requiredEvidence": [
+        "denial reason acknowledged",
+        "retry scope updated",
+        "new write-target validation"
+      ]
+    },
+    {
+      "checkId": "pre-handoff",
+      "when": "before parent review, merge, or production handoff",
+      "requiredEvidence": [
+        "runtime checkpoint",
+        "resource release receipt",
+        "external repo path confirmation"
+      ]
+    }
+  ],
+  "childContract": {
+    "mustAskResourceManagerBeforeResources": true,
+    "mustRecordReceiptBeforeExternalRepoWrites": true,
+    "receiptFields": [
+      "receipt_id",
+      "agent_id",
+      "stage_id",
+      "checked_at",
+      "agentdoc_root",
+      "startup_variant",
+      "machine_id",
+      "workspace_root",
+      "status",
+      "notes"
+    ]
+  },
+  "receiptExample": {
+    "receipt_id": "ad-circle3d-043",
+    "agent_id": "builder-render-fix",
+    "stage_id": "builder-wave-1",
+    "checked_at": "2026-03-28T10:20:00Z",
+    "agentdoc_root": "/dev_vepfs/rc_wu/AgentDoc",
+    "startup_variant": "research-dev-intern-02",
+    "machine_id": "dev-intern-02",
+    "workspace_root": "<CIRCLE_EDITING_ROOT>/worktrees/catfish-build-wave-1-b",
+    "status": "ok",
+    "notes": [
+      "Git preflight completed.",
+      "Write boundary confirmed under approved worktree.",
+      "Storage preflight reviewed before reusing vePFS scratch."
+    ]
+  },
+  "cadenceExample": [
+    {
+      "timestamp": "2026-03-28T09:00:00Z",
+      "action": "startup-before-stage",
+      "actor": "circle3d-root-supervisor"
+    },
+    {
+      "timestamp": "2026-03-28T09:10:00Z",
+      "action": "pre-resource-request",
+      "actor": "builder-geo-refactor"
+    },
+    {
+      "timestamp": "2026-03-28T10:02:00Z",
+      "action": "post-denial-recheck",
+      "actor": "builder-render-fix"
+    },
+    {
+      "timestamp": "2026-03-28T10:50:00Z",
+      "action": "heartbeat-check",
+      "actor": "circle3d-agentdoc-monitor"
+    },
+    {
+      "timestamp": "2026-03-28T11:35:00Z",
+      "action": "pre-handoff",
+      "actor": "builder-geo-refactor"
+    }
+  ]
+}

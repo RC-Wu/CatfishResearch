@@ -1,0 +1,262 @@
+{
+  "schemaVersion": "catfish.dispatch-state.v1",
+  "project": {
+    "projectId": "circleediting-3d-edit",
+    "title": "CircleEditing 3d Edit Onboarding",
+    "objective": "Supervise CircleEditing 3d-edit work entirely through Catfish so resource planning, AgentDoc checks, and child dispatch remain parent-owned.",
+    "workspaceRoot": "/dev_vepfs/rc_wu/repos/pua_research_worktrees/circle3d_onboarding",
+    "status": "production-onboarding-example",
+    "defaultMachineId": "dev-intern-02",
+    "branchPrefix": "catfish/circleediting-3d",
+    "launchDefaults": {
+      "host": "local",
+      "remoteHome": "/dev_vepfs/rc_wu",
+      "remoteBinaryStore": "/dev_vepfs/rc_wu/bin/codex",
+      "remoteRunRoot": "/dev_vepfs/rc_wu/codex_subagents",
+      "sandbox": "danger-full-access",
+      "approval": "never",
+      "search": true,
+      "skipInstall": true,
+      "addDir": [
+        "/dev_vepfs/rc_wu/repos/pua_research_worktrees/circle3d_onboarding"
+      ]
+    },
+    "agentGroups": [
+      {
+        "agentGroupId": "resource-planned-builder",
+        "label": "Resource-Planned Builder",
+        "roles": [
+          "worker"
+        ],
+        "promptPrefix": "You may not claim GPU, vePFS, CPU, or CircleEditing write access until the Catfish resource manager approves a request."
+      },
+      {
+        "agentGroupId": "builder-plus-safety-critic",
+        "label": "Builder + Safety Critic",
+        "roles": [
+          "worker",
+          "reviewer"
+        ],
+        "scoreBias": 0.02,
+        "promptPrefix": "Before finalizing, verify AgentDoc check recency, resource approval coverage, and workspace-root safety."
+      },
+      {
+        "agentGroupId": "doc-and-ops-checker",
+        "label": "Doc + Ops Checker",
+        "roles": [
+          "monitor",
+          "reviewer"
+        ],
+        "promptPrefix": "Treat AgentDoc, runtime notes, and resource receipts as mandatory evidence, not optional commentary."
+      }
+    ]
+  },
+  "projectContext": {
+    "supervisionMode": "catfish-pipeline-only",
+    "supervisedProject": {
+      "projectLabel": "CircleEditing",
+      "taskSurface": "3d-edit",
+      "rootPath": "<CIRCLE_EDITING_ROOT>",
+      "rootResolution": "Resolve the external project root explicitly at dispatch time. Do not guess and do not infer from the shell current directory.",
+      "parentDirectMutation": "forbidden",
+      "mutationPath": "Catfish parent approves resources and scope, child agent checks AgentDoc, child agent works inside an approved CircleEditing worktree, parent reviews outputs through Catfish.",
+      "requiredContext": [
+        "task brief",
+        "target branch or worktree path",
+        "relevant scene or asset subset",
+        "resource approval receipt",
+        "latest AgentDoc receipt"
+      ]
+    },
+    "deliverables": [
+      "resource-approved implementation child tasks",
+      "AgentDoc receipts attached to each stage transition",
+      "control-center-visible supervision state",
+      "safe branch competition records without parent-side CircleEditing edits"
+    ],
+    "pathGuards": {
+      "approvedWriteRoots": [
+        "/dev_vepfs/rc_wu/repos",
+        "/dev_vepfs/rc_wu/codex_subagents",
+        "/dev_vepfs/rc_wu/tmp"
+      ],
+      "forbiddenWriteRoots": [
+        "/",
+        "/root",
+        "/dev_vepfs",
+        "/shared-dev"
+      ],
+      "spilloverPolicy": "deny-dispatch-if-any-write-target-is-outside-an-approved-root"
+    }
+  },
+  "resourceGovernance": {
+    "ownerNodeId": "circle3d-resource-manager",
+    "requestRequiredFor": [
+      "gpu",
+      "vepfs_storage",
+      "cpu_cores",
+      "external_repo_write_access"
+    ],
+    "limits": {
+      "maxTotalGpus": 4,
+      "maxTotalVepfsGb": 50,
+      "cpuSafety": {
+        "maxTotalLogicalCores": 24,
+        "maxCpuPercentPerHost": 70,
+        "sshReserveLogicalCores": 4,
+        "maxLoadAveragePerHost": 24.0
+      }
+    },
+    "policyPaths": {
+      "resourceContract": "assets/catfish_policy/circleediting_resource_manager_contract.example.json",
+      "agentDocPolicy": "assets/catfish_policy/circleediting_agentdoc_check_policy.example.json"
+    }
+  },
+  "runtime": {
+    "projectId": "circleediting-3d-edit",
+    "operations": [
+      {
+        "op": "register_project",
+        "project": {
+          "project_id": "circleediting-3d-edit",
+          "title": "CircleEditing 3d Edit Onboarding",
+          "objective": "Supervise CircleEditing 3d-edit through Catfish without parent-side direct modifications.",
+          "resource_budget": {
+            "token_budget": 95000,
+            "usd_budget": 35.0,
+            "wall_time_budget_s": 28800.0,
+            "max_parallel_children": 4
+          }
+        }
+      },
+      {
+        "op": "upsert_agent_node",
+        "project_id": "circleediting-3d-edit",
+        "node": {
+          "node_id": "circle3d-root-supervisor",
+          "role": "supervisor",
+          "label": "Circle3D Root Supervisor",
+          "status": "active",
+          "resource_budget": {
+            "token_budget": 24000,
+            "max_parallel_children": 4
+          },
+          "metadata": {
+            "bootstrapped_by": "production-onboarding-example",
+            "workspace_root": "/dev_vepfs/rc_wu/repos/pua_research_worktrees/circle3d_onboarding",
+            "supervision_mode": "catfish-pipeline-only"
+          }
+        }
+      },
+      {
+        "op": "upsert_agent_node",
+        "project_id": "circleediting-3d-edit",
+        "node": {
+          "node_id": "circle3d-resource-manager",
+          "role": "allocator",
+          "label": "Circle3D Resource Manager",
+          "status": "active",
+          "parent_node_id": "circle3d-root-supervisor",
+          "resource_budget": {
+            "token_budget": 12000,
+            "max_parallel_children": 4
+          },
+          "metadata": {
+            "authority": "gpu-storage-cpu-approvals",
+            "max_total_gpus": 4,
+            "max_total_vepfs_gb": 50
+          }
+        }
+      },
+      {
+        "op": "upsert_agent_node",
+        "project_id": "circleediting-3d-edit",
+        "node": {
+          "node_id": "circle3d-agentdoc-monitor",
+          "role": "monitor",
+          "label": "Circle3D AgentDoc Monitor",
+          "status": "active",
+          "parent_node_id": "circle3d-root-supervisor",
+          "resource_budget": {
+            "token_budget": 8000,
+            "max_parallel_children": 1
+          },
+          "metadata": {
+            "agentdoc_root": "/dev_vepfs/rc_wu/AgentDoc",
+            "stale_after_minutes": 60,
+            "heartbeat_check_every_minutes": 45
+          }
+        }
+      }
+    ]
+  },
+  "stages": [
+    {
+      "stageId": "intake-3d-edit",
+      "competitionId": "comp-intake-3d-edit",
+      "parentNodeId": "circle3d-root-supervisor",
+      "taskCategory": "supervisor",
+      "difficulty": "high",
+      "parentScore": 0.92,
+      "candidateCount": 1,
+      "cwd": "/dev_vepfs/rc_wu/repos/pua_research_worktrees/circle3d_onboarding",
+      "branchPrefix": "catfish/circleediting-3d/intake",
+      "dispatchRunId": "circle3d-intake-20260328",
+      "promptText": "Resolve <CIRCLE_EDITING_ROOT>, ingest the structured project context, verify Catfish is the only authority for planning and approvals, and prepare child-only execution paths for CircleEditing 3d-edit work.",
+      "resourceBudget": {
+        "token_budget": 9000,
+        "usd_budget": 3.0,
+        "wall_time_budget_s": 1800.0
+      },
+      "launch": {
+        "requiresResourceApproval": false,
+        "requiresAgentDocCheck": true
+      }
+    },
+    {
+      "stageId": "builder-wave-1",
+      "competitionId": "comp-builder-wave-1",
+      "parentNodeId": "circle3d-resource-manager",
+      "taskCategory": "builder",
+      "difficulty": "high",
+      "parentScore": 0.9,
+      "candidateCount": 4,
+      "cwd": "<CIRCLE_EDITING_ROOT>",
+      "branchPrefix": "catfish/circleediting-3d/build-wave-1",
+      "dispatchRunId": "circle3d-build-wave-1-20260328",
+      "promptText": "Launch up to four competing child agents for CircleEditing 3d-edit work. Each child must acquire Catfish resource approval before using GPU, vePFS, CPU, or CircleEditing write access. Each child must check AgentDoc before modifying files, on stage transition, and after any resource denial or storage-path change.",
+      "resourceBudget": {
+        "token_budget": 36000,
+        "usd_budget": 12.0,
+        "wall_time_budget_s": 10800.0
+      },
+      "dispatch": {
+        "unusedProviderBonus": 0.08,
+        "unusedModelBonus": 0.05,
+        "unusedAgentGroupBonus": 0.06,
+        "providerRepeatPenalty": 0.04,
+        "modelRepeatPenalty": 0.03,
+        "agentGroupRepeatPenalty": 0.04,
+        "bundleRepeatPenalty": 0.05
+      },
+      "launch": {
+        "requiresResourceApproval": true,
+        "requiresAgentDocCheck": true,
+        "resourceContractPath": "assets/catfish_policy/circleediting_resource_manager_contract.example.json",
+        "agentDocPolicyPath": "assets/catfish_policy/circleediting_agentdoc_check_policy.example.json",
+        "resourceEnvelope": {
+          "maxTotalGpus": 4,
+          "maxTotalVepfsGb": 50,
+          "maxTotalLogicalCores": 24,
+          "sshReserveLogicalCores": 4,
+          "spilloverPolicy": "no-root-dir-spillover"
+        }
+      },
+      "agentGroups": [
+        "resource-planned-builder",
+        "builder-plus-safety-critic",
+        "doc-and-ops-checker"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,386 @@
+{
+  "generated_at": "2026-03-28T11:45:00Z",
+  "metadata": {
+    "workspace": "control_center",
+    "runtime": "dev-intern-02",
+    "source": "circleediting-3d-production-onboarding",
+    "manifest_path": "assets/catfish_dispatch_examples/circleediting_3d_edit_onboarding_state.json",
+    "resource_contract_path": "assets/catfish_policy/circleediting_resource_manager_contract.example.json",
+    "agentdoc_policy_path": "assets/catfish_policy/circleediting_agentdoc_check_policy.example.json",
+    "approved_usage": {
+      "gpu_count": 3,
+      "vepfs_gb": 46,
+      "cpu_cores": 18,
+      "ssh_reserve_logical_cores": 6
+    }
+  },
+  "projects": [
+    {
+      "project_id": "circleediting-3d-edit",
+      "label": "CircleEditing 3d Edit",
+      "status": "running",
+      "active_branch": "catfish/circleediting-3d/build-wave-1",
+      "owner": "circle3d-root-supervisor",
+      "active_agents": 5,
+      "pending_reviews": 1,
+      "current_stage": "builder-wave-1",
+      "frontier_width": 4,
+      "last_event_at": "2026-03-28T11:42:00Z",
+      "summary": "Catfish is supervising CircleEditing 3d-edit through child-only worktrees, with 3 of 4 GPUs approved, vePFS capped at 46 of 50 GB, and CPU headroom preserved for SSH."
+    }
+  ],
+  "agents": [
+    {
+      "agent_id": "circle3d-root-supervisor",
+      "label": "Circle3D Root Supervisor",
+      "role": "supervisor",
+      "status": "running",
+      "project_id": "circleediting-3d-edit",
+      "provider_profile": "current-session",
+      "task_kind": "supervisor",
+      "branch": "catfish/circleediting-3d/intake",
+      "machine_id": "dev-intern-02",
+      "summary": "Owns parent-only planning, dispatch, and final review without editing CircleEditing directly."
+    },
+    {
+      "agent_id": "circle3d-resource-manager",
+      "label": "Circle3D Resource Manager",
+      "role": "allocator",
+      "status": "running",
+      "project_id": "circleediting-3d-edit",
+      "provider_profile": "current-session",
+      "task_kind": "allocator",
+      "branch": "catfish/circleediting-3d/intake",
+      "parent_id": "circle3d-root-supervisor",
+      "machine_id": "dev-intern-02",
+      "summary": "Approves and denies child requests so GPU, vePFS, CPU, and CircleEditing write access remain parent-owned."
+    },
+    {
+      "agent_id": "circle3d-agentdoc-monitor",
+      "label": "Circle3D AgentDoc Monitor",
+      "role": "monitor",
+      "status": "running",
+      "project_id": "circleediting-3d-edit",
+      "provider_profile": "dev02-slot-2",
+      "task_kind": "monitor",
+      "branch": "catfish/circleediting-3d/intake",
+      "parent_id": "circle3d-root-supervisor",
+      "machine_id": "dev-intern-02",
+      "summary": "Enforces 45-minute AgentDoc heartbeat checks and forces rechecks on denials, stage changes, and handoff."
+    },
+    {
+      "agent_id": "builder-geo-refactor",
+      "label": "Geometry Refactor Builder",
+      "role": "worker",
+      "status": "running",
+      "project_id": "circleediting-3d-edit",
+      "provider_profile": "current-session",
+      "task_kind": "builder",
+      "branch": "catfish/circleediting-3d/build-wave-1/a",
+      "parent_id": "circle3d-resource-manager",
+      "machine_id": "dev-intern-02",
+      "summary": "Approved for 2 GPUs, 16 GB vePFS, and 8 CPU cores inside an approved CircleEditing worktree."
+    },
+    {
+      "agent_id": "builder-render-fix",
+      "label": "Render Fix Builder",
+      "role": "worker",
+      "status": "review",
+      "project_id": "circleediting-3d-edit",
+      "provider_profile": "dev02-slot-2",
+      "task_kind": "builder",
+      "branch": "catfish/circleediting-3d/build-wave-1/b",
+      "parent_id": "circle3d-resource-manager",
+      "machine_id": "dev-intern-02",
+      "summary": "Paused after a denial for root-dir spillover risk and awaiting a corrected resource request with a fresh AgentDoc receipt."
+    }
+  ],
+  "providers": [
+    {
+      "profile_id": "current-session",
+      "label": "Current Session",
+      "machine_ids": [
+        "dev-intern-02"
+      ],
+      "available": true,
+      "verified": true,
+      "remaining_credit": 0.94,
+      "reserve_floor": 0.15,
+      "routing_weight": 1.0,
+      "active_launches": 2,
+      "verified_models": [
+        "gpt-5.4"
+      ],
+      "issues": [],
+      "route_tiers": {
+        "balanced": {
+          "model": "gpt-5.4"
+        },
+        "deep": {
+          "model": "gpt-5.4"
+        }
+      },
+      "selected": true
+    },
+    {
+      "profile_id": "dev02-slot-2",
+      "label": "dev02 Slot 2",
+      "machine_ids": [
+        "dev-intern-02"
+      ],
+      "available": true,
+      "verified": true,
+      "remaining_credit": 0.73,
+      "reserve_floor": 0.15,
+      "routing_weight": 0.82,
+      "active_launches": 1,
+      "verified_models": [
+        "gpt-5.4-mini",
+        "gpt-5.4"
+      ],
+      "issues": [
+        "resource-denial-pending-retry"
+      ],
+      "route_tiers": {
+        "quick": {
+          "model": "gpt-5.4-mini"
+        },
+        "balanced": {
+          "model": "gpt-5.4"
+        }
+      }
+    }
+  ],
+  "branches": [
+    {
+      "branch": "catfish/circleediting-3d/intake",
+      "project_id": "circleediting-3d-edit",
+      "score": 92.1,
+      "wins": 3,
+      "losses": 0,
+      "state": "leading",
+      "head_commit": "c3d1a0f",
+      "summary": "Strong onboarding discipline with explicit resource and AgentDoc contracts."
+    },
+    {
+      "branch": "catfish/circleediting-3d/build-wave-1/a",
+      "project_id": "circleediting-3d-edit",
+      "score": 88.7,
+      "wins": 2,
+      "losses": 1,
+      "state": "contending",
+      "head_commit": "a7b3f40",
+      "summary": "Best current implementation path with approved GPU and storage envelope."
+    },
+    {
+      "branch": "catfish/circleediting-3d/build-wave-1/b",
+      "project_id": "circleediting-3d-edit",
+      "score": 71.2,
+      "wins": 1,
+      "losses": 2,
+      "state": "review",
+      "head_commit": "f8d4401",
+      "summary": "Technically promising, but blocked on a resource denial and workspace-path correction."
+    }
+  ],
+  "stage_competitions": [
+    {
+      "competition_id": "comp-builder-wave-1",
+      "project_id": "circleediting-3d-edit",
+      "stage_id": "builder-wave-1",
+      "stage_label": "Builder Wave 1",
+      "status": "running",
+      "parent_id": "circle3d-resource-manager",
+      "parent_label": "Circle3D Resource Manager",
+      "advancement_mode": "top-k-survival",
+      "candidate_count": 4,
+      "run_count": 3,
+      "scored_run_count": 2,
+      "pending_runs": 1,
+      "winner_run_id": "",
+      "winner_label": "",
+      "leading_score": 88.7,
+      "score_spread": 17.5,
+      "providers": [
+        "current-session",
+        "dev02-slot-2"
+      ],
+      "models": [
+        "gpt-5.4",
+        "gpt-5.4-mini"
+      ],
+      "agent_groups": [
+        "resource-planned-builder",
+        "builder-plus-safety-critic",
+        "doc-and-ops-checker"
+      ],
+      "unique_stacks": 3,
+      "dominant_stack_share": 0.5,
+      "last_activity_at": "2026-03-28T11:42:00Z",
+      "summary": "Wave remains under the 4 GPU and 50 GB vePFS caps while preserving one denied path for safety analysis instead of silently rerouting."
+    }
+  ],
+  "pending_reviews": [
+    {
+      "review_id": "review-circle3d-safety-001",
+      "project_id": "circleediting-3d-edit",
+      "stage_id": "builder-wave-1",
+      "target_kind": "resource-denial",
+      "target_id": "rr-circle3d-021",
+      "status": "pending",
+      "requested_by": "circle3d-resource-manager",
+      "created_at": "2026-03-28T10:03:00Z",
+      "priority": "high",
+      "summary": "Confirm the denied builder path no longer targets an unsafe root-adjacent output directory before allowing a retry."
+    }
+  ],
+  "launches": [
+    {
+      "launch_id": "launch-circle3d-a",
+      "project_id": "circleediting-3d-edit",
+      "stage_id": "builder-wave-1",
+      "node_id": "builder-geo-refactor",
+      "node_label": "Geometry Refactor Builder",
+      "branch": "catfish/circleediting-3d/build-wave-1/a",
+      "status": "running",
+      "provider": "current-session",
+      "model": "gpt-5.4",
+      "launched_at": "2026-03-28T09:18:00Z",
+      "source": "catfish_remote_dispatch",
+      "summary": "Launch approved after AgentDoc receipt and resource-manager signoff."
+    },
+    {
+      "launch_id": "launch-circle3d-b",
+      "project_id": "circleediting-3d-edit",
+      "stage_id": "builder-wave-1",
+      "node_id": "builder-render-fix",
+      "node_label": "Render Fix Builder",
+      "branch": "catfish/circleediting-3d/build-wave-1/b",
+      "status": "review",
+      "provider": "dev02-slot-2",
+      "model": "gpt-5.4",
+      "launched_at": "2026-03-28T09:42:00Z",
+      "source": "catfish_remote_dispatch",
+      "summary": "Launch paused after denial because a follow-up request proposed a write target outside approved roots."
+    }
+  ],
+  "capability_summaries": [
+    {
+      "source_kind": "agent",
+      "subject_id": "circle3d-resource-manager",
+      "subject_label": "Circle3D Resource Manager",
+      "capability": "safe-resource-allocation",
+      "project_id": "circleediting-3d-edit",
+      "sample_count": 6,
+      "average_score": 0.97,
+      "last_score": 0.99,
+      "confidence": 0.95,
+      "updated_at": "2026-03-28T11:40:00Z",
+      "summary": "Consistently enforced the 4 GPU, 50 GB vePFS, CPU headroom, and approved-root constraints."
+    },
+    {
+      "source_kind": "provider",
+      "subject_id": "current-session",
+      "subject_label": "Current Session",
+      "capability": "3d-edit-build-work",
+      "project_id": "circleediting-3d-edit",
+      "sample_count": 4,
+      "average_score": 0.9,
+      "last_score": 0.91,
+      "confidence": 0.88,
+      "updated_at": "2026-03-28T11:35:00Z",
+      "summary": "Primary provider for builder-wave-1 with stable quota and verified deep-tier performance."
+    }
+  ],
+  "diversity_metrics": [
+    {
+      "metric_id": "div-circle3d-builder-wave-1",
+      "project_id": "circleediting-3d-edit",
+      "stage_id": "builder-wave-1",
+      "label": "Circle3D Builder Wave 1",
+      "candidate_count": 4,
+      "unique_providers": 2,
+      "unique_models": 2,
+      "unique_agent_groups": 3,
+      "unique_stacks": 3,
+      "dominant_stack_share": 0.5,
+      "wildcard_count": 1,
+      "summary": "Competition width stayed at four candidates without violating the shared GPU, storage, or CPU envelope."
+    }
+  ],
+  "events": [
+    {
+      "event_id": "evt-circle3d-100",
+      "timestamp": "2026-03-28T09:00:00Z",
+      "level": "info",
+      "kind": "project-sync",
+      "message": "Loaded CircleEditing 3d-edit onboarding manifest and supervision policies.",
+      "project_id": "circleediting-3d-edit"
+    },
+    {
+      "event_id": "evt-circle3d-101",
+      "timestamp": "2026-03-28T09:17:00Z",
+      "level": "info",
+      "kind": "resource-approved",
+      "message": "Approved request rr-circle3d-017 for 2 GPUs, 16 GB vePFS, and 8 CPU cores.",
+      "project_id": "circleediting-3d-edit",
+      "agent_id": "circle3d-resource-manager",
+      "branch": "catfish/circleediting-3d/build-wave-1/a",
+      "payload": {
+        "request_id": "rr-circle3d-017",
+        "approved_gpu_count": 2,
+        "approved_vepfs_gb": 16,
+        "approved_cpu_cores": 8
+      }
+    },
+    {
+      "event_id": "evt-circle3d-102",
+      "timestamp": "2026-03-28T10:02:00Z",
+      "level": "warning",
+      "kind": "resource-denied",
+      "message": "Denied request rr-circle3d-021 because the GPU cap would be exceeded and the proposed output path risked root-dir spillover.",
+      "project_id": "circleediting-3d-edit",
+      "agent_id": "circle3d-resource-manager",
+      "branch": "catfish/circleediting-3d/build-wave-1/b",
+      "payload": {
+        "request_id": "rr-circle3d-021",
+        "reasons": [
+          "gpu-cap-exceeded",
+          "write-target-outside-approved-root"
+        ]
+      }
+    },
+    {
+      "event_id": "evt-circle3d-103",
+      "timestamp": "2026-03-28T10:20:00Z",
+      "level": "info",
+      "kind": "agentdoc-check",
+      "message": "Builder-render-fix refreshed AgentDoc receipt after denial before preparing a retry.",
+      "project_id": "circleediting-3d-edit",
+      "agent_id": "circle3d-agentdoc-monitor",
+      "branch": "catfish/circleediting-3d/build-wave-1/b",
+      "payload": {
+        "receipt_id": "ad-circle3d-043",
+        "stale_after_minutes": 60
+      }
+    },
+    {
+      "event_id": "evt-circle3d-104",
+      "timestamp": "2026-03-28T10:50:00Z",
+      "level": "info",
+      "kind": "agent-heartbeat",
+      "message": "AgentDoc heartbeat completed with all active builders under the 45-minute cadence.",
+      "project_id": "circleediting-3d-edit",
+      "agent_id": "circle3d-agentdoc-monitor"
+    },
+    {
+      "event_id": "evt-circle3d-105",
+      "timestamp": "2026-03-28T11:42:00Z",
+      "level": "info",
+      "kind": "safety-window",
+      "message": "Aggregate usage remained within 3 GPUs, 46 GB vePFS, and 18 CPU cores, leaving SSH headroom intact.",
+      "project_id": "circleediting-3d-edit",
+      "agent_id": "circle3d-resource-manager"
+    }
+  ]
+}

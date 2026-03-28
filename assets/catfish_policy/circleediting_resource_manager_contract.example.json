@@ -1,0 +1,198 @@
+{
+  "schemaVersion": "catfish.resource-manager-contract.v1",
+  "contractId": "circleediting-3d-resource-contract-20260328",
+  "projectId": "circleediting-3d-edit",
+  "updatedAt": "2026-03-28T00:00:00Z",
+  "ownership": {
+    "resourceManagerNodeId": "circle3d-resource-manager",
+    "authority": "Catfish parent is the only authority that can approve or deny GPU, vePFS storage, CPU, and CircleEditing write-access allocations.",
+    "childRule": "Child agents must request resources before using them and must not self-allocate, assume defaults, or bypass the manager."
+  },
+  "clusterLimits": {
+    "maxTotalGpus": 4,
+    "maxTotalVepfsGb": 50,
+    "cpuSafety": {
+      "maxTotalLogicalCores": 24,
+      "maxCpuPercentPerHost": 70,
+      "sshReserveLogicalCores": 4,
+      "maxLoadAveragePerHost": 24.0
+    },
+    "filesystem": {
+      "allowedWriteRoots": [
+        "/dev_vepfs/rc_wu/repos",
+        "/dev_vepfs/rc_wu/codex_subagents",
+        "/dev_vepfs/rc_wu/tmp"
+      ],
+      "forbiddenWriteRoots": [
+        "/",
+        "/root",
+        "/dev_vepfs",
+        "/shared-dev"
+      ],
+      "spilloverPolicy": "deny-if-any-target-path-is-not-under-an-approved-write-root"
+    }
+  },
+  "requestContract": {
+    "requiredFields": [
+      "request_id",
+      "project_id",
+      "stage_id",
+      "agent_id",
+      "requested_at",
+      "purpose",
+      "requested_resources",
+      "workspace",
+      "agentdoc_receipt",
+      "safety_assertions"
+    ],
+    "requestedResourceFields": [
+      "gpu_count",
+      "vepfs_gb",
+      "cpu_cores",
+      "memory_gb",
+      "write_targets"
+    ],
+    "stateMachine": [
+      "submitted",
+      "needs-clarification",
+      "approved",
+      "denied",
+      "released"
+    ]
+  },
+  "approvalContract": {
+    "requiredFields": [
+      "approval_id",
+      "request_id",
+      "decision",
+      "approved_at",
+      "approved_by",
+      "approved_resources",
+      "lease_ttl_minutes",
+      "constraints",
+      "release_requirements"
+    ],
+    "invariants": [
+      "sum(approved_resources.gpu_count) across active approvals must remain <= 4",
+      "sum(approved_resources.vepfs_gb) across active approvals must remain <= 50",
+      "sum(approved_resources.cpu_cores) across active approvals must preserve at least 4 logical cores for SSH and supervisory traffic",
+      "every approved write target must stay under an allowed write root"
+    ]
+  },
+  "denialContract": {
+    "requiredFields": [
+      "denial_id",
+      "request_id",
+      "decision",
+      "denied_at",
+      "denied_by",
+      "reasons",
+      "retry_policy",
+      "follow_up_actions"
+    ],
+    "standardReasons": [
+      "gpu-cap-exceeded",
+      "vepfs-cap-exceeded",
+      "cpu-unsafe-for-ssh",
+      "missing-agentdoc-check",
+      "write-target-outside-approved-root",
+      "insufficient-purpose-detail"
+    ]
+  },
+  "requestExample": {
+    "request_id": "rr-circle3d-017",
+    "project_id": "circleediting-3d-edit",
+    "stage_id": "builder-wave-1",
+    "agent_id": "builder-geo-refactor",
+    "requested_at": "2026-03-28T09:15:00Z",
+    "purpose": "Refactor CircleEditing mesh transform path for 3d-edit stability inside an approved worktree.",
+    "requested_resources": {
+      "gpu_count": 2,
+      "vepfs_gb": 16,
+      "cpu_cores": 8,
+      "memory_gb": 48,
+      "write_targets": [
+        "<CIRCLE_EDITING_ROOT>/worktrees/catfish-build-wave-1-a",
+        "/dev_vepfs/rc_wu/codex_subagents/circle3d-build-wave-1-a"
+      ]
+    },
+    "workspace": {
+      "machine_id": "dev-intern-02",
+      "cwd": "<CIRCLE_EDITING_ROOT>/worktrees/catfish-build-wave-1-a",
+      "external_repo": "CircleEditing"
+    },
+    "agentdoc_receipt": {
+      "receipt_id": "ad-circle3d-041",
+      "checked_at": "2026-03-28T09:10:00Z",
+      "age_minutes": 5,
+      "result": "ok"
+    },
+    "safety_assertions": {
+      "no_root_dir_spillover": true,
+      "ssh_headroom_preserved": true,
+      "storage_within_vepfs_cap": true
+    },
+    "state": "submitted"
+  },
+  "approvalExample": {
+    "approval_id": "ra-circle3d-017",
+    "request_id": "rr-circle3d-017",
+    "decision": "approved",
+    "approved_at": "2026-03-28T09:17:00Z",
+    "approved_by": "circle3d-resource-manager",
+    "approved_resources": {
+      "gpu_count": 2,
+      "vepfs_gb": 16,
+      "cpu_cores": 8,
+      "memory_gb": 48,
+      "write_targets": [
+        "<CIRCLE_EDITING_ROOT>/worktrees/catfish-build-wave-1-a",
+        "/dev_vepfs/rc_wu/codex_subagents/circle3d-build-wave-1-a"
+      ]
+    },
+    "lease_ttl_minutes": 180,
+    "constraints": [
+      "Do not exceed 70 percent sustained CPU on dev-intern-02.",
+      "Release resources immediately when GPU work completes.",
+      "Renew AgentDoc receipt if older than 60 minutes or after a denial."
+    ],
+    "release_requirements": [
+      "emit release event",
+      "record actual peak GPU and vePFS usage",
+      "confirm all writes stayed under approved roots"
+    ]
+  },
+  "denialExample": {
+    "denial_id": "rd-circle3d-021",
+    "request_id": "rr-circle3d-021",
+    "decision": "denied",
+    "denied_at": "2026-03-28T10:02:00Z",
+    "denied_by": "circle3d-resource-manager",
+    "reasons": [
+      "gpu-cap-exceeded",
+      "write-target-outside-approved-root"
+    ],
+    "retry_policy": "retry-after-reducing-gpu-count-and-moving-output-under-approved-worktree",
+    "follow_up_actions": [
+      "perform a fresh AgentDoc check before resubmission",
+      "update write_targets to an approved CircleEditing worktree path",
+      "request no more than 1 additional GPU while other leases remain active"
+    ]
+  },
+  "releaseExample": {
+    "release_id": "rl-circle3d-017",
+    "approval_id": "ra-circle3d-017",
+    "released_at": "2026-03-28T11:40:00Z",
+    "released_by": "builder-geo-refactor",
+    "actual_usage": {
+      "peak_gpu_count": 2,
+      "peak_vepfs_gb": 13.4,
+      "peak_cpu_cores": 7
+    },
+    "postconditions": [
+      "No root-dir spillover detected.",
+      "SSH reserve remained intact.",
+      "Child outputs are ready for parent review."
+    ]
+  }
+}
