@@ -76,6 +76,7 @@ def load_live_state(state_root: Path) -> ControlSnapshot:
     resource_manager_state = _load_optional_json(system_root / "resource_manager_state.json", default={})
     agentdoc_state = _load_optional_json(system_root / "agentdoc_state.json", default={})
     supervisor_state_payload = _load_optional_json(system_root / "supervisor_state.json", default={})
+    provider_route_preview_payload = _load_optional_json(system_root / "provider_route_preview.json", default={})
     external_repo_manifest = _load_optional_json(
         system_root / "external_repo_manifest.json",
         default=_load_optional_json(DEFAULT_EXTERNAL_REPO_MANIFEST_PATH, default={}),
@@ -271,6 +272,12 @@ def load_live_state(state_root: Path) -> ControlSnapshot:
         scheduler_state=scheduler_state,
         launches=list(launches.values()),
     )
+    route_preview = _normalize_provider_route_preview(provider_route_preview_payload)
+    if route_preview is not None:
+        providers = tuple(
+            replace(provider, selected=(provider.profile_id == str(route_preview.get("profileId", ""))))
+            for provider in providers
+        )
     generated_at = _first_str(
         scheduler_state.get("generatedAt"),
         scheduler_state.get("generated_at"),
@@ -307,6 +314,7 @@ def load_live_state(state_root: Path) -> ControlSnapshot:
             "resource_manager_state": str(system_root / "resource_manager_state.json"),
             "agentdoc_state": str(system_root / "agentdoc_state.json"),
             "supervisor_state": str(system_root / "supervisor_state.json"),
+            "provider_route_preview": str(system_root / "provider_route_preview.json"),
             "external_repo_manifest": str(system_root / "external_repo_manifest.json"),
         },
     }
@@ -359,6 +367,7 @@ def load_live_state(state_root: Path) -> ControlSnapshot:
         module_scout_candidates=tuple(
             sorted(module_scout_candidates, key=lambda item: (-item.total_score, item.decision, item.candidate_id))
         ),
+        route_preview=route_preview,
         metadata=metadata,
     )
 
@@ -588,6 +597,26 @@ def apply_route_preview(
     metadata = dict(snapshot.metadata)
     metadata["route_preview_source"] = str(config_path)
     return replace(snapshot, providers=providers, route_preview=route_preview, metadata=metadata)
+
+
+def _normalize_provider_route_preview(payload: dict[str, Any]) -> dict[str, Any] | None:
+    if not payload:
+        return None
+    if not isinstance(payload, dict):
+        return None
+    profile_id = str(payload.get("profileId", payload.get("profile_id", ""))).strip()
+    model = str(payload.get("model", "")).strip()
+    tier_id = str(payload.get("tierId", payload.get("tier_id", ""))).strip()
+    if not profile_id:
+        return None
+    normalized = dict(payload)
+    normalized["profileId"] = profile_id
+    if model:
+        normalized["model"] = model
+    if tier_id:
+        normalized["tierId"] = tier_id
+    normalized.setdefault("selected", True)
+    return normalized
 
 
 def _load_optional_json(path: Path, *, default: Any) -> Any:
