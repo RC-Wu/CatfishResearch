@@ -1,0 +1,68 @@
+{
+  "projectId": "circleediting-3d-edit",
+  "label": "CircleEditing 3d Edit",
+  "title": "CircleEditing 3D Edit Production Smoke",
+  "status": "running",
+  "owner": "circle3d-root-supervisor",
+  "currentStage": "builder-wave-1",
+  "frontierWidth": 4,
+  "activeBranch": "catfish/circleediting-3d/intake",
+  "summary": "Simulated production smoke state-root for Catfish supervision of CircleEditing 3d-edit.",
+  "objective": "Prove Catfish can supervise CircleEditing through state-root/contracts under resource and AgentDoc guardrails.",
+  "projectContext": {
+    "supervisedProject": {
+      "name": "CircleEditing",
+      "root": "/dev_vepfs/rc_wu/edit/CircleEditing",
+      "mode": "child-only-worktrees"
+    },
+    "smokeMode": true
+  },
+  "pathGuards": {
+    "approvedRoots": [
+      "/dev_vepfs/rc_wu/repos",
+      "/dev_vepfs/rc_wu/codex_subagents",
+      "/dev_vepfs/rc_wu/tmp"
+    ],
+    "forbiddenRoots": [
+      "/",
+      "/home",
+      "/root"
+    ]
+  },
+  "resourceGovernance": {
+    "managerId": "circle3d-resource-manager",
+    "gpuLimit": 4,
+    "vePfsLimitGb": 50,
+    "cpuReserveCores": 4,
+    "agentDocCadenceMinutes": 45
+  },
+  "branches": [
+    {
+      "branch": "catfish/circleediting-3d/intake",
+      "score": 91.5,
+      "wins": 3,
+      "losses": 0,
+      "state": "leading",
+      "headCommit": "c3d1a0f",
+      "summary": "Parent-owned intake and approval path."
+    },
+    {
+      "branch": "catfish/circleediting-3d/build-wave-1/a",
+      "score": 89.2,
+      "wins": 2,
+      "losses": 1,
+      "state": "contending",
+      "headCommit": "a7b3f40",
+      "summary": "Strong geometry path inside the approved resource envelope."
+    },
+    {
+      "branch": "catfish/circleediting-3d/build-wave-1/b",
+      "score": 74.8,
+      "wins": 1,
+      "losses": 2,
+      "state": "review",
+      "headCommit": "f8d4401",
+      "summary": "Still simulated, but kept under the same guardrails."
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "observedAt": "2026-03-28T11:45:00Z",
+  "components": {
+    "catfish-runtime-worker": {
+      "role": "worker",
+      "status": "running",
+      "healthy": true,
+      "lastHeartbeatAt": "2026-03-28T11:44:45Z",
+      "lastProgressAt": "2026-03-28T11:44:35Z",
+      "summary": "Runtime worker stays within the smoke envelope."
+    },
+    "catfish-scheduler": {
+      "role": "scheduler",
+      "status": "running",
+      "healthy": true,
+      "lastHeartbeatAt": "2026-03-28T11:44:50Z",
+      "lastProgressAt": "2026-03-28T11:44:40Z",
+      "summary": "Scheduler remains healthy and responsive."
+    },
+    "circle3d-resource-manager": {
+      "role": "manager",
+      "status": "running",
+      "healthy": true,
+      "lastHeartbeatAt": "2026-03-28T11:44:40Z",
+      "lastProgressAt": "2026-03-28T11:44:25Z",
+      "summary": "Resource manager keeps the child-only approval contract intact."
+    },
+    "circle3d-agentdoc-monitor": {
+      "role": "monitor",
+      "status": "running",
+      "healthy": true,
+      "lastHeartbeatAt": "2026-03-28T11:44:42Z",
+      "lastProgressAt": "2026-03-28T11:44:31Z",
+      "summary": "AgentDoc monitor refreshed receipts within cadence."
+    }
+  },
+  "restartHistory": []
+}

@@ -1,0 +1,51 @@
+{
+  "observedAt": "2026-03-28T11:45:00Z",
+  "managerId": "circle3d-resource-manager",
+  "requests": [
+    {
+      "requestId": "req-circle3d-gpu",
+      "agentId": "builder-geo-refactor",
+      "resourceKind": "gpu",
+      "status": "approved",
+      "approvedBy": "circle3d-resource-manager"
+    },
+    {
+      "requestId": "req-circle3d-storage",
+      "agentId": "builder-geo-refactor",
+      "resourceKind": "storage",
+      "status": "approved",
+      "approvedBy": "circle3d-resource-manager"
+    },
+    {
+      "requestId": "req-circle3d-cpu",
+      "agentId": "builder-geo-refactor",
+      "resourceKind": "cpu",
+      "status": "approved",
+      "approvedBy": "circle3d-resource-manager"
+    }
+  ],
+  "allocations": [
+    {
+      "allocationId": "alloc-circle3d-gpu-0",
+      "resourceKind": "gpu",
+      "status": "active",
+      "ownerId": "circle3d-resource-manager",
+      "leaseHolder": "builder-geo-refactor"
+    },
+    {
+      "allocationId": "alloc-circle3d-storage-0",
+      "resourceKind": "storage",
+      "status": "active",
+      "ownerId": "circle3d-resource-manager",
+      "leaseHolder": "builder-geo-refactor"
+    },
+    {
+      "allocationId": "alloc-circle3d-cpu-0",
+      "resourceKind": "cpu",
+      "status": "active",
+      "ownerId": "circle3d-resource-manager",
+      "leaseHolder": "builder-geo-refactor",
+      "percent": 18.0
+    }
+  ]
+}

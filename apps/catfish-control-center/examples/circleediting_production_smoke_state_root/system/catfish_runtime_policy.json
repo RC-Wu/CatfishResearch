@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "catfish.runtime-guardrail.v1",
+  "updatedAt": "2026-03-28T11:45:00Z",
+  "resourceManager": {
+    "managerId": "circle3d-resource-manager",
+    "ownedResourceKinds": [
+      "gpu",
+      "storage",
+      "cpu"
+    ]
+  },
+  "budgets": {
+    "rootDir": {
+      "policyId": "circle3d-root-budget",
+      "path": "/dev_vepfs/rc_wu/repos",
+      "maxBytes": 20971520,
+      "warnBytes": 15728640,
+      "actionScript": "du -sb /dev_vepfs/rc_wu/repos"
+    },
+    "vePfs": {
+      "policyId": "circle3d-vepfs-budget",
+      "path": "/dev_vepfs/rc_wu/edit/CircleEditing",
+      "maxBytes": 53687091200,
+      "warnBytes": 48318382080,
+      "actionScript": "du -sb /dev_vepfs/rc_wu/edit/CircleEditing"
+    },
+    "cpu": {
+      "policyId": "circle3d-cpu-budget",
+      "maxPercent": 60.0,
+      "warnPercent": 45.0,
+      "hostReservePercent": 40.0,
+      "actionScript": "python -m catfish_control_center.main --view supervisor"
+    }
+  },
+  "ownership": {
+    "policyId": "circle3d-manager-ownership",
+    "resourceKinds": [
+      "gpu",
+      "storage",
+      "cpu"
+    ],
+    "actionScript": "python -m catfish_control_center.main --view guardrails --format json"
+  },
+  "gpu": {
+    "policyId": "circle3d-gpu-concurrency",
+    "maxSimultaneousOwners": 1,
+    "warnSimultaneousOwners": 1,
+    "actionScript": "python -m catfish_control_center.main --view guardrails"
+  },
+  "agentDoc": {
+    "policyId": "circle3d-agentdoc-heartbeat",
+    "requiredCadenceSeconds": 2700,
+    "warnCadenceSeconds": 1800,
+    "actionScript": "python -m catfish_control_center.main --view recent-events"
+  },
+  "supervisor": {
+    "workerStallSeconds": 900,
+    "schedulerStallSeconds": 900,
+    "restartCooldownSeconds": 900,
+    "maxRestartsPerWindow": 2,
+    "restartWindowSeconds": 3600,
+    "restartCommand": "catfish-supervisor restart --component {component}"
+  }
+}

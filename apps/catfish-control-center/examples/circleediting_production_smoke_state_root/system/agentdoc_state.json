@@ -1,0 +1,30 @@
+{
+  "observedAt": "2026-03-28T11:45:00Z",
+  "agents": [
+    {
+      "agentId": "circle3d-root-supervisor",
+      "lastAgentDocCheckAt": "2026-03-28T11:43:10Z",
+      "lastHeartbeatAt": "2026-03-28T11:44:20Z"
+    },
+    {
+      "agentId": "circle3d-resource-manager",
+      "lastAgentDocCheckAt": "2026-03-28T11:43:30Z",
+      "lastHeartbeatAt": "2026-03-28T11:44:30Z"
+    },
+    {
+      "agentId": "circle3d-agentdoc-monitor",
+      "lastAgentDocCheckAt": "2026-03-28T11:43:40Z",
+      "lastHeartbeatAt": "2026-03-28T11:44:35Z"
+    },
+    {
+      "agentId": "builder-geo-refactor",
+      "lastAgentDocCheckAt": "2026-03-28T11:42:50Z",
+      "lastHeartbeatAt": "2026-03-28T11:44:10Z"
+    },
+    {
+      "agentId": "builder-render-fix",
+      "lastAgentDocCheckAt": "2026-03-28T11:42:55Z",
+      "lastHeartbeatAt": "2026-03-28T11:44:05Z"
+    }
+  ]
+}

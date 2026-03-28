@@ -1,0 +1,161 @@
+{
+  "project": {
+    "title": "CircleEditing 3d Edit",
+    "objective": "Prove Catfish can supervise CircleEditing through state-root/contracts under resource and AgentDoc guardrails.",
+    "status": "running"
+  },
+  "nodes": {
+    "circle3d-root-supervisor": {
+      "label": "Circle3D Root Supervisor",
+      "role": "supervisor",
+      "status": "running",
+      "provider_assignment": {
+        "provider": "current-session",
+        "model": "gpt-5.4"
+      },
+      "metadata": {
+        "branch": "catfish/circleediting-3d/intake",
+        "machineId": "dev-intern-02",
+        "taskKind": "supervisor",
+        "summary": "Owns planning, approval, and review without touching CircleEditing source directly."
+      }
+    },
+    "circle3d-resource-manager": {
+      "label": "Circle3D Resource Manager",
+      "role": "allocator",
+      "status": "running",
+      "provider_assignment": {
+        "provider": "current-session",
+        "model": "gpt-5.4"
+      },
+      "metadata": {
+        "branch": "catfish/circleediting-3d/intake",
+        "machineId": "dev-intern-02",
+        "taskKind": "allocator",
+        "summary": "Approves GPU, storage, CPU, and workspace access for child-only CircleEditing worktrees."
+      }
+    },
+    "circle3d-agentdoc-monitor": {
+      "label": "Circle3D AgentDoc Monitor",
+      "role": "monitor",
+      "status": "running",
+      "provider_assignment": {
+        "provider": "dev02-slot-2",
+        "model": "gpt-5.4-mini"
+      },
+      "metadata": {
+        "branch": "catfish/circleediting-3d/intake",
+        "machineId": "dev-intern-02",
+        "taskKind": "monitor",
+        "summary": "Refreshes AgentDoc receipts and heartbeat cadence before each child step."
+      }
+    },
+    "builder-geo-refactor": {
+      "label": "Geometry Refactor Builder",
+      "role": "worker",
+      "status": "running",
+      "provider_assignment": {
+        "provider": "current-session",
+        "model": "gpt-5.4"
+      },
+      "metadata": {
+        "branch": "catfish/circleediting-3d/build-wave-1/a",
+        "machineId": "dev-intern-02",
+        "taskKind": "builder",
+        "summary": "Uses approved child worktrees and stays within the smoke envelope."
+      }
+    },
+    "builder-render-fix": {
+      "label": "Render Fix Builder",
+      "role": "worker",
+      "status": "review",
+      "provider_assignment": {
+        "provider": "dev02-slot-2",
+        "model": "gpt-5.4-mini"
+      },
+      "metadata": {
+        "branch": "catfish/circleediting-3d/build-wave-1/b",
+        "machineId": "dev-intern-02",
+        "taskKind": "builder",
+        "summary": "Simulated second builder path that still remains under parent supervision."
+      }
+    }
+  },
+  "competitions": {
+    "comp-builder-wave-1": {
+      "parent_node_id": "circle3d-resource-manager",
+      "candidate_node_ids": [
+        "builder-geo-refactor",
+        "builder-render-fix"
+      ],
+      "status": "running",
+      "last_verdict_id": "verdict-wave-1",
+      "metadata": {
+        "stageId": "builder-wave-1",
+        "stageLabel": "Builder Wave 1",
+        "summary": "Builder wave stays within approved resource and AgentDoc guardrails."
+      }
+    }
+  },
+  "runs": {
+    "run-geo-refactor": {
+      "competition_id": "comp-builder-wave-1",
+      "node_id": "builder-geo-refactor",
+      "parent_score": 89.2,
+      "submitted_at": "2026-03-28T11:39:00Z",
+      "notes": "Reference geometry path stays within the approved roots and lease bounds.",
+      "metadata": {
+        "branch": "catfish/circleediting-3d/build-wave-1/a",
+        "stageId": "builder-wave-1"
+      }
+    },
+    "run-render-fix": {
+      "competition_id": "comp-builder-wave-1",
+      "node_id": "builder-render-fix",
+      "parent_score": 84.8,
+      "submitted_at": "2026-03-28T11:41:00Z",
+      "notes": "Render-fix path is still simulated, but supervision stays parent-owned.",
+      "metadata": {
+        "branch": "catfish/circleediting-3d/build-wave-1/b",
+        "stageId": "builder-wave-1"
+      }
+    }
+  },
+  "verdicts": {
+    "verdict-wave-1": {
+      "verdict_id": "verdict-wave-1",
+      "winner_run_id": "run-geo-refactor",
+      "submitted_at": "2026-03-28T11:42:00Z",
+      "rationale": "Highest scoring path under the approved resource contract."
+    }
+  },
+  "experience_artifacts": [
+    {
+      "artifact_id": "circleediting-3d-edit:experience:1",
+      "scope": "project",
+      "project_id": "circleediting-3d-edit",
+      "level_kind": "project",
+      "subject_id": "circleediting-3d-edit",
+      "subject_label": "CircleEditing 3d Edit",
+      "report_kind": "project-contract",
+      "direct_score": 0.91,
+      "sample_count": 1,
+      "parent_subject_id": "circle3d-root-supervisor",
+      "hierarchy_path": [
+        "project:circleediting-3d-edit"
+      ],
+      "updated_at": "2026-03-28T11:42:00Z",
+      "summary": "Parent-owned supervision and child-only worktrees kept the smoke run within bounds.",
+      "evidence_refs": [
+        "manifest",
+        "resource-contract"
+      ],
+      "metadata": {
+        "simulated": true,
+        "guardrails": "root-20MiB-vepfs-50GiB"
+      }
+    }
+  ],
+  "module_scout_contracts": [],
+  "module_scout_candidates": []
+}
