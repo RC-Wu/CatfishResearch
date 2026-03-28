@@ -1,5 +1,7 @@
 # Catfish Control Center Skeleton
 
+This page describes the original backend-first skeleton. The current live-state baseline is documented in [`CONTROL_CENTER_LIVE_20260325.md`](CONTROL_CENTER_LIVE_20260325.md), and the code now supports both `--snapshot` and `--state-root` inputs.
+
 ## Purpose
 
 This repository already had a lightweight routing core in `tools/codex_route_preview.py`, but it explicitly stopped short of a persistent control-plane surface. `apps/catfish-control-center` is the missing next layer for CatfishResearch: a backend-first control-center skeleton that can materialize multi-project state, display agent hierarchy, track provider health and quota pressure, compare competing branches, and preserve both snapshot and append-only event views.
