@@ -1,0 +1,98 @@
+{
+  "schemaVersion": "catfish.experience-report.v1",
+  "generated_at": "2026-03-28T10:15:00Z",
+  "project_experience": {
+    "project_id": "proj-alpha",
+    "artifacts": [
+      {
+        "artifact_id": "proj-alpha:run:builder-a",
+        "scope": "project",
+        "project_id": "proj-alpha",
+        "level_kind": "agent",
+        "subject_id": "builder-a",
+        "subject_label": "Builder A",
+        "report_kind": "competition-run",
+        "direct_score": 0.92,
+        "hierarchy_path": [
+          "project:proj-alpha",
+          "agent:project-director",
+          "agent:builder-a"
+        ],
+        "updated_at": "2026-03-28T09:55:00Z",
+        "summary": "Builder A won the implementation run."
+      },
+      {
+        "artifact_id": "proj-alpha:project:frontier",
+        "scope": "project",
+        "project_id": "proj-alpha",
+        "level_kind": "project",
+        "subject_id": "proj-alpha",
+        "subject_label": "Project Alpha",
+        "report_kind": "branch-frontier",
+        "direct_score": 0.85,
+        "hierarchy_path": [
+          "project:proj-alpha"
+        ],
+        "updated_at": "2026-03-28T10:00:00Z",
+        "summary": "Project frontier remains healthy."
+      }
+    ],
+    "reports": [
+      {
+        "report_id": "experience:project:proj-alpha:agent:project-director",
+        "scope": "project",
+        "project_id": "proj-alpha",
+        "level_kind": "agent",
+        "subject_id": "project-director",
+        "subject_label": "Project Director",
+        "parent_report_id": "experience:project:proj-alpha:project:proj-alpha",
+        "depth": 1,
+        "direct_artifact_count": 0,
+        "child_report_count": 1,
+        "total_sample_count": 1,
+        "direct_score": 0.0,
+        "aggregated_score": 0.92,
+        "confidence": 0.43,
+        "updated_at": "2026-03-28T09:55:00Z",
+        "summary": "Director report receives experience from builder children.",
+        "artifact_ids": [],
+        "child_report_ids": [
+          "experience:project:proj-alpha:agent:builder-a"
+        ],
+        "hierarchy_path": [
+          "project:proj-alpha",
+          "agent:project-director"
+        ]
+      }
+    ]
+  },
+  "global_experience": {
+    "reports": [
+      {
+        "report_id": "experience:global:global:global:catfish-research",
+        "scope": "global",
+        "project_id": "",
+        "level_kind": "global",
+        "subject_id": "catfish-research",
+        "subject_label": "CatfishResearch",
+        "parent_report_id": "",
+        "depth": 0,
+        "direct_artifact_count": 0,
+        "child_report_count": 1,
+        "total_sample_count": 1,
+        "direct_score": 0.0,
+        "aggregated_score": 0.84,
+        "confidence": 0.43,
+        "updated_at": "2026-03-28T10:10:00Z",
+        "summary": "Global report only absorbs dedicated self-optimization experience.",
+        "artifact_ids": [],
+        "child_report_ids": [
+          "experience:global:global:worker:self-optimizer"
+        ],
+        "hierarchy_path": [
+          "global:catfish-research"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "schema_version": "catfish.module-scout-competition.v1",
+  "generated_at": "2026-03-28T10:20:00Z",
+  "competition_id": "global-scout-implementation",
+  "scope": "global",
+  "objective": "Score external module candidates under the same competitive discipline as branch work.",
+  "trigger": {
+    "type": "module-use",
+    "module_id": "scheduler/implementation-builder",
+    "observed_count": 5
+  },
+  "candidates": [
+    {
+      "candidate_id": "candidate:promptfoo",
+      "source_id": "promptfoo",
+      "score_entry_id": "candidate:promptfoo",
+      "total_score": 0.844,
+      "decision": "attempt-convert-to-skill",
+      "install_attempt_status": "eligible"
+    },
+    {
+      "candidate_id": "candidate:d2",
+      "source_id": "d2",
+      "score_entry_id": "candidate:d2",
+      "total_score": 0.704,
+      "decision": "attempt-install",
+      "install_attempt_status": "eligible"
+    },
+    {
+      "candidate_id": "candidate:openhands",
+      "source_id": "openhands",
+      "score_entry_id": "candidate:openhands",
+      "total_score": 0.657,
+      "decision": "reject",
+      "install_attempt_status": "blocked"
+    }
+  ],
+  "queue_task_id": "opt-task-module-scout",
+  "notes": [
+    "Global competition is not attached to a user project.",
+    "Only allowlisted candidates can proceed beyond screening."
+  ]
+}

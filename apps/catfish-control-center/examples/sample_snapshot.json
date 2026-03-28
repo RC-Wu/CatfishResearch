@@ -211,5 +211,241 @@
       "project_id": "catfish-core",
       "agent_id": "worker-scoreboard"
     }
+  ],
+  "experience_artifacts": [
+    {
+      "artifact_id": "catfish-core:run:worker-graph",
+      "scope": "project",
+      "project_id": "catfish-core",
+      "level_kind": "agent",
+      "subject_id": "worker-graph",
+      "subject_label": "Agent Graph Worker",
+      "report_kind": "competition-run",
+      "direct_score": 0.91,
+      "weight": 1.0,
+      "sample_count": 1,
+      "parent_subject_id": "root-orchestrator",
+      "hierarchy_path": [
+        "project:catfish-core",
+        "agent:root-orchestrator",
+        "agent:worker-graph"
+      ],
+      "updated_at": "2026-03-25T11:56:40Z",
+      "summary": "Agent graph worker produced the strongest hierarchy patch.",
+      "evidence_refs": [
+        "feature/agent-graph"
+      ],
+      "metadata": {
+        "stage_id": "implementation"
+      }
+    },
+    {
+      "artifact_id": "catfish-core:project:frontier",
+      "scope": "project",
+      "project_id": "catfish-core",
+      "level_kind": "project",
+      "subject_id": "catfish-core",
+      "subject_label": "Catfish Core",
+      "report_kind": "branch-frontier",
+      "direct_score": 0.897,
+      "weight": 2.0,
+      "sample_count": 2,
+      "hierarchy_path": [
+        "project:catfish-core"
+      ],
+      "updated_at": "2026-03-25T11:58:00Z",
+      "summary": "Project frontier remains healthy across hierarchy and scoreboard work.",
+      "evidence_refs": [
+        "feature/agent-graph",
+        "feature/scoreboard-refresh"
+      ],
+      "metadata": {
+        "leading_branch": "feature/agent-graph"
+      }
+    },
+    {
+      "artifact_id": "global:scout:promptfoo",
+      "scope": "global",
+      "project_id": "",
+      "level_kind": "module",
+      "subject_id": "promptfoo",
+      "subject_label": "promptfoo",
+      "report_kind": "module-scout",
+      "direct_score": 0.844,
+      "weight": 1.0,
+      "sample_count": 1,
+      "parent_subject_id": "self-optimizer",
+      "hierarchy_path": [
+        "global:catfish-research",
+        "worker:self-optimizer",
+        "scout:scout-contract-impl",
+        "module:promptfoo"
+      ],
+      "updated_at": "2026-03-25T11:59:00Z",
+      "summary": "promptfoo cleared the safe scout threshold for a convert-to-skill trial.",
+      "evidence_refs": [
+        "https://github.com/promptfoo/promptfoo",
+        "global-scout-implementation"
+      ],
+      "metadata": {
+        "decision": "attempt-convert-to-skill"
+      }
+    }
+  ],
+  "experience_reports": [
+    {
+      "report_id": "experience:project:catfish-core:project:catfish-core",
+      "scope": "project",
+      "project_id": "catfish-core",
+      "level_kind": "project",
+      "subject_id": "catfish-core",
+      "subject_label": "Catfish Core",
+      "parent_report_id": "",
+      "depth": 0,
+      "direct_artifact_count": 1,
+      "child_report_count": 1,
+      "total_sample_count": 3,
+      "direct_score": 0.897,
+      "aggregated_score": 0.9013,
+      "confidence": 0.53,
+      "updated_at": "2026-03-25T11:58:00Z",
+      "summary": "Catfish Core aggregates direct project frontier signals and child agent results.",
+      "artifact_ids": [
+        "catfish-core:project:frontier"
+      ],
+      "child_report_ids": [
+        "experience:project:catfish-core:agent:root-orchestrator"
+      ],
+      "hierarchy_path": [
+        "project:catfish-core"
+      ]
+    },
+    {
+      "report_id": "experience:global:global:global:catfish-research",
+      "scope": "global",
+      "project_id": "",
+      "level_kind": "global",
+      "subject_id": "catfish-research",
+      "subject_label": "CatfishResearch",
+      "parent_report_id": "",
+      "depth": 0,
+      "direct_artifact_count": 0,
+      "child_report_count": 1,
+      "total_sample_count": 1,
+      "direct_score": 0.0,
+      "aggregated_score": 0.844,
+      "confidence": 0.43,
+      "updated_at": "2026-03-25T11:59:00Z",
+      "summary": "Global CatfishResearch report receives experience from the self-optimization worker.",
+      "artifact_ids": [],
+      "child_report_ids": [
+        "experience:global:global:worker:self-optimizer"
+      ],
+      "hierarchy_path": [
+        "global:catfish-research"
+      ]
+    }
+  ],
+  "optimization_workers": [
+    {
+      "worker_id": "self-optimizer",
+      "label": "Self Optimizer",
+      "status": "running",
+      "queue_name": "self-optimization",
+      "active_task_id": "opt-task-scout",
+      "completed_tasks": 4,
+      "last_heartbeat_at": "2026-03-25T11:59:20Z",
+      "summary": "Dedicated CatfishResearch worker consuming only global experience."
+    }
+  ],
+  "optimization_tasks": [
+    {
+      "task_id": "opt-task-scout",
+      "queue_name": "self-optimization",
+      "scope": "global",
+      "status": "running",
+      "priority": "high",
+      "objective": "Scout stronger implementation support modules for CatfishResearch itself.",
+      "target_kind": "module-scout",
+      "source_report_id": "experience:global:global:global:catfish-research",
+      "project_id": "",
+      "competition_id": "global-scout-implementation",
+      "candidate_ids": [
+        "scout-promptfoo",
+        "scout-d2"
+      ],
+      "created_at": "2026-03-25T11:57:10Z",
+      "updated_at": "2026-03-25T11:59:10Z",
+      "summary": "Global queue item proving self-optimization is separate from project execution.",
+      "metadata": {
+        "trigger": "module-use:implementation-builder"
+      }
+    }
+  ],
+  "module_scout_contracts": [
+    {
+      "contract_id": "scout-contract-impl",
+      "module_id": "scheduler/implementation-builder",
+      "module_label": "Implementation Builder",
+      "capability": "implementation",
+      "project_id": "",
+      "search_query": "best evaluation and patch competition tools for autonomous coding",
+      "allowlist_manifest": "assets/external_repos/catfish_external_repo_manifest_20260325.json",
+      "allowed_source_ids": [
+        "promptfoo",
+        "d2"
+      ],
+      "safe_install_modes": [
+        "clone-reference",
+        "convert-to-skill"
+      ],
+      "max_candidates": 3,
+      "require_explicit_allowlist": true,
+      "require_human_review": true,
+      "created_at": "2026-03-25T11:57:00Z",
+      "summary": "Scout contract for when the implementation builder module is exercised."
+    }
+  ],
+  "module_scout_candidates": [
+    {
+      "candidate_id": "scout-promptfoo",
+      "contract_id": "scout-contract-impl",
+      "source_kind": "repo",
+      "source_id": "promptfoo",
+      "title": "promptfoo",
+      "capability": "implementation",
+      "project_id": "",
+      "source_url": "https://github.com/promptfoo/promptfoo",
+      "status": "ready",
+      "allowlisted": true,
+      "install_policy": "clone-reference",
+      "conversion_target": "skill",
+      "install_attempt_status": "eligible",
+      "competition_id": "global-scout-implementation",
+      "score_entry_id": "candidate:promptfoo",
+      "total_score": 0.844,
+      "novelty_score": 0.78,
+      "quality_score": 0.91,
+      "fit_score": 0.88,
+      "operational_score": 0.73,
+      "decision": "attempt-convert-to-skill",
+      "rationale": [
+        "source is present in the explicit scout allowlist",
+        "install policy clone-reference is permitted by the scout contract",
+        "candidate exceeded the auto-trial score threshold"
+      ],
+      "install_contract": {
+        "allowlist_manifest": "assets/external_repos/catfish_external_repo_manifest_20260325.json",
+        "require_human_review": true,
+        "safe_install_modes": [
+          "clone-reference",
+          "convert-to-skill"
+        ]
+      },
+      "summary": "Strong eval harness candidate for Catfish.",
+      "metadata": {
+        "updated_at": "2026-03-25T11:59:00Z"
+      }
+    }
   ]
 }

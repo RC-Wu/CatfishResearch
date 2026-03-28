@@ -15,8 +15,14 @@ if str(APP_ROOT) not in sys.path:
 
 from catfish_control_center.cli import main as cli_main
 from catfish_control_center.dashboard import render_dashboard, render_view, view_to_dict
-from catfish_control_center.models import ControlEvent
-from catfish_control_center.runtime import apply_route_preview, load_live_state, load_snapshot
+from catfish_control_center.models import ControlEvent, ExperienceArtifact, ModuleScoutCandidate, ModuleScoutContract
+from catfish_control_center.runtime import (
+    aggregate_experience_reports,
+    apply_route_preview,
+    evaluate_module_scout_candidate,
+    load_live_state,
+    load_snapshot,
+)
 from catfish_control_center.storage import InMemoryEventStore, JsonLinesEventStore, JsonSnapshotStore
 
 
@@ -354,6 +360,115 @@ class ControlCenterTest(unittest.TestCase):
                 "restartHistory": [],
             },
         )
+        self._write_json(
+            system_root / "self_optimization.json",
+            {
+                "schemaVersion": "catfish.self-optimization.v1",
+                "globalId": "catfish-research",
+                "label": "CatfishResearch",
+                "worker": {
+                    "worker_id": "self-optimizer",
+                    "label": "Self Optimizer",
+                    "status": "running",
+                    "queue_name": "self-optimization",
+                    "active_task_id": "opt-task-scout",
+                    "completed_tasks": 3,
+                    "last_heartbeat_at": "2026-03-25T12:19:45Z",
+                    "summary": "Consumes global experience and runs safe module trials.",
+                },
+                "queue": [
+                    {
+                        "task_id": "opt-task-scout",
+                        "queue_name": "self-optimization",
+                        "scope": "global",
+                        "status": "running",
+                        "priority": "high",
+                        "objective": "Evaluate stronger implementation support modules for CatfishResearch itself.",
+                        "target_kind": "module-scout",
+                        "competition_id": "global-scout-implementation",
+                        "candidate_ids": ["scout-promptfoo", "scout-openhands"],
+                        "created_at": "2026-03-25T12:18:30Z",
+                        "updated_at": "2026-03-25T12:19:40Z",
+                        "summary": "Dedicated self-improvement loop for implementation tooling.",
+                    }
+                ],
+                "module_scout_contracts": [
+                    {
+                        "contract_id": "scout-contract-impl",
+                        "module_id": "scheduler/implementation-builder",
+                        "module_label": "Implementation Builder",
+                        "capability": "implementation",
+                        "search_query": "best evaluation and patch competition tools for autonomous coding",
+                        "allowlist_manifest": "assets/external_repos/catfish_external_repo_manifest_20260325.json",
+                        "allowed_source_ids": ["promptfoo", "d2"],
+                        "safe_install_modes": ["clone-reference", "convert-to-skill"],
+                        "max_candidates": 3,
+                        "require_explicit_allowlist": True,
+                        "require_human_review": True,
+                        "created_at": "2026-03-25T12:18:00Z",
+                        "summary": "Triggered whenever the implementation builder module is active.",
+                    }
+                ],
+                "module_scout_candidates": [
+                    {
+                        "candidate_id": "scout-promptfoo",
+                        "contract_id": "scout-contract-impl",
+                        "source_kind": "repo",
+                        "source_id": "promptfoo",
+                        "title": "promptfoo",
+                        "capability": "implementation",
+                        "source_url": "https://github.com/promptfoo/promptfoo",
+                        "install_policy": "clone-reference",
+                        "conversion_target": "skill",
+                        "competition_id": "global-scout-implementation",
+                        "score_entry_id": "candidate:promptfoo",
+                        "metadata": {
+                            "novelty_score": 0.78,
+                            "quality_score": 0.91,
+                            "fit_score": 0.88,
+                            "operational_score": 0.73,
+                            "updated_at": "2026-03-25T12:19:10Z",
+                        },
+                        "summary": "Strong eval harness candidate for Catfish.",
+                    },
+                    {
+                        "candidate_id": "scout-openhands",
+                        "contract_id": "scout-contract-impl",
+                        "source_kind": "repo",
+                        "source_id": "openhands",
+                        "title": "OpenHands",
+                        "capability": "implementation",
+                        "source_url": "https://github.com/OpenHands/OpenHands",
+                        "install_policy": "clone-reference",
+                        "competition_id": "global-scout-implementation",
+                        "score_entry_id": "candidate:openhands",
+                        "metadata": {
+                            "novelty_score": 0.72,
+                            "quality_score": 0.89,
+                            "fit_score": 0.54,
+                            "operational_score": 0.35,
+                            "updated_at": "2026-03-25T12:19:05Z",
+                        },
+                        "summary": "Useful runtime reference but too heavy for safe adoption.",
+                    },
+                ],
+                "experience_artifacts": [
+                    {
+                        "artifact_id": "global-loop-1",
+                        "scope": "global",
+                        "level_kind": "worker",
+                        "subject_id": "self-optimizer",
+                        "subject_label": "Self Optimizer",
+                        "report_kind": "optimization-cycle",
+                        "direct_score": 0.83,
+                        "sample_count": 2,
+                        "hierarchy_path": ["global:catfish-research", "worker:self-optimizer"],
+                        "updated_at": "2026-03-25T12:19:45Z",
+                        "summary": "Global self-optimization queue is consuming experience successfully.",
+                    }
+                ],
+            },
+        )
 
         project_root = projects_root / "proj-alpha"
         self._write_json(
@@ -631,6 +746,27 @@ class ControlCenterTest(unittest.TestCase):
                 },
             ],
         )
+        self._write_json(
+            project_root / "experience_log.json",
+            {
+                "artifacts": [
+                    {
+                        "artifact_id": "proj-alpha:manual-review",
+                        "scope": "project",
+                        "project_id": "proj-alpha",
+                        "level_kind": "agent",
+                        "subject_id": "project-director",
+                        "subject_label": "Project Director",
+                        "report_kind": "review",
+                        "direct_score": 0.81,
+                        "sample_count": 1,
+                        "hierarchy_path": ["project:proj-alpha", "agent:project-director"],
+                        "updated_at": "2026-03-25T12:14:00Z",
+                        "summary": "Director kept the implementation frontier healthy.",
+                    }
+                ]
+            },
+        )
         return state_root
 
     def test_dashboard_renders_route_preview_and_sections(self) -> None:
@@ -651,6 +787,9 @@ class ControlCenterTest(unittest.TestCase):
         self.assertIn("Supervisor State", rendered)
         self.assertIn("Provider Status", rendered)
         self.assertIn("Branch Scoreboards", rendered)
+        self.assertIn("Experience Reports", rendered)
+        self.assertIn("Global Self-Optimization", rendered)
+        self.assertIn("Module Scouts", rendered)
         self.assertIn("Route Preview", rendered)
         self.assertIn("Current Session (current-session) SELECTED", rendered)
         self.assertIn("tier=deep", rendered)
@@ -678,6 +817,18 @@ class ControlCenterTest(unittest.TestCase):
         self.assertEqual(snapshot.guardrail_state.overall_status, "ok")
         self.assertIsNotNone(snapshot.supervisor_state)
         self.assertEqual(snapshot.supervisor_state.overall_status, "healthy")
+        self.assertGreaterEqual(len(snapshot.experience_artifacts), 5)
+        self.assertTrue(any(item.scope == "project" for item in snapshot.experience_reports))
+        self.assertTrue(any(item.scope == "global" for item in snapshot.experience_reports))
+        self.assertEqual(len(snapshot.optimization_workers), 1)
+        self.assertEqual(snapshot.optimization_workers[0].worker_id, "self-optimizer")
+        self.assertEqual(len(snapshot.optimization_tasks), 1)
+        self.assertEqual(len(snapshot.module_scout_contracts), 1)
+        self.assertEqual(len(snapshot.module_scout_candidates), 2)
+        promptfoo_candidate = next(item for item in snapshot.module_scout_candidates if item.source_id == "promptfoo")
+        self.assertEqual(promptfoo_candidate.decision, "attempt-convert-to-skill")
+        openhands_candidate = next(item for item in snapshot.module_scout_candidates if item.source_id == "openhands")
+        self.assertEqual(openhands_candidate.decision, "reject")
 
         provider_states = {item.profile_id: item for item in snapshot.providers}
         self.assertTrue(provider_states["ucloud-modelverse"].available)
@@ -705,6 +856,14 @@ class ControlCenterTest(unittest.TestCase):
         supervisor_view = render_view(snapshot, "supervisor")
         self.assertIn("restart_intent=none", supervisor_view)
 
+        experience_payload = view_to_dict(snapshot, "experience-reports")
+        self.assertGreaterEqual(len(experience_payload["experience_artifacts"]), 5)
+        self.assertTrue(any(item["scope"] == "global" for item in experience_payload["experience_reports"]))
+
+        scout_view = render_view(snapshot, "module-scouts")
+        self.assertIn("promptfoo", scout_view)
+        self.assertIn("attempt-convert-to-skill", scout_view)
+
     def test_cli_accepts_state_root_and_view(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             state_root = self._build_live_state_root(Path(tmpdir))
@@ -725,6 +884,111 @@ class ControlCenterTest(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(len(payload["providers"]), 2)
         self.assertEqual(payload["providers"][0]["profile_id"], "smartaipro")
+
+    def test_aggregate_experience_reports_flows_upward(self) -> None:
+        artifacts = [
+            ExperienceArtifact(
+                artifact_id="child-a",
+                scope="project",
+                project_id="proj-x",
+                level_kind="agent",
+                subject_id="child-a",
+                subject_label="Child A",
+                report_kind="execution",
+                direct_score=0.9,
+                sample_count=1,
+                hierarchy_path=("project:proj-x", "agent:root", "agent:child-a"),
+            ),
+            ExperienceArtifact(
+                artifact_id="child-b",
+                scope="project",
+                project_id="proj-x",
+                level_kind="agent",
+                subject_id="child-b",
+                subject_label="Child B",
+                report_kind="execution",
+                direct_score=0.5,
+                sample_count=1,
+                hierarchy_path=("project:proj-x", "agent:root", "agent:child-b"),
+            ),
+            ExperienceArtifact(
+                artifact_id="root-review",
+                scope="project",
+                project_id="proj-x",
+                level_kind="agent",
+                subject_id="root",
+                subject_label="Root",
+                report_kind="review",
+                direct_score=0.8,
+                sample_count=1,
+                hierarchy_path=("project:proj-x", "agent:root"),
+            ),
+        ]
+
+        reports = aggregate_experience_reports(
+            artifacts,
+            subject_labels={
+                ("project", "proj-x", "project", "proj-x"): "Project X",
+                ("project", "proj-x", "agent", "root"): "Root",
+            },
+        )
+        reports_by_id = {item.report_id: item for item in reports}
+
+        root_report = reports_by_id["experience:project:proj-x:agent:root"]
+        project_report = reports_by_id["experience:project:proj-x:project:proj-x"]
+        self.assertAlmostEqual(root_report.aggregated_score, 0.7333, places=4)
+        self.assertAlmostEqual(project_report.aggregated_score, 0.7333, places=4)
+        self.assertEqual(root_report.child_report_count, 2)
+
+    def test_scout_decision_logic_requires_allowlist_and_threshold(self) -> None:
+        contract = ModuleScoutContract(
+            contract_id="contract-1",
+            module_id="scheduler/implementation-builder",
+            module_label="Implementation Builder",
+            capability="implementation",
+            allowed_source_ids=("promptfoo",),
+            safe_install_modes=("clone-reference", "convert-to-skill"),
+            max_candidates=2,
+        )
+        strong_candidate = ModuleScoutCandidate(
+            candidate_id="cand-1",
+            contract_id="contract-1",
+            source_kind="repo",
+            source_id="promptfoo",
+            title="promptfoo",
+            capability="implementation",
+            install_policy="clone-reference",
+            conversion_target="skill",
+            metadata={
+                "novelty_score": 0.8,
+                "quality_score": 0.92,
+                "fit_score": 0.9,
+                "operational_score": 0.75,
+            },
+        )
+        weak_candidate = ModuleScoutCandidate(
+            candidate_id="cand-2",
+            contract_id="contract-1",
+            source_kind="repo",
+            source_id="openhands",
+            title="OpenHands",
+            capability="implementation",
+            install_policy="clone-reference",
+            metadata={
+                "novelty_score": 0.72,
+                "quality_score": 0.88,
+                "fit_score": 0.45,
+                "operational_score": 0.32,
+            },
+        )
+
+        evaluated_strong = evaluate_module_scout_candidate(contract, strong_candidate)
+        evaluated_weak = evaluate_module_scout_candidate(contract, weak_candidate)
+
+        self.assertEqual(evaluated_strong.decision, "attempt-convert-to-skill")
+        self.assertEqual(evaluated_strong.install_attempt_status, "eligible")
+        self.assertEqual(evaluated_weak.decision, "reject")
+        self.assertEqual(evaluated_weak.install_attempt_status, "blocked")
 
     def test_snapshot_store_round_trip(self) -> None:
         snapshot = load_snapshot(self.snapshot_path)

@@ -1,0 +1,50 @@
+{
+  "manifest_version": 1,
+  "schema": "catfish.module-scout-allowlist.v1",
+  "generated_at": "2026-03-28T10:00:00Z",
+  "policy": {
+    "require_explicit_allowlist": true,
+    "allowed_install_modes": [
+      "clone-reference",
+      "convert-to-skill"
+    ],
+    "blocked_install_modes": [
+      "auto-exec",
+      "auto-deploy",
+      "dependency-injection-without-review"
+    ],
+    "score_thresholds": {
+      "attempt_install": 0.7,
+      "queue_for_review": 0.55
+    }
+  },
+  "allowed_items": [
+    {
+      "source_id": "promptfoo",
+      "repo": "promptfoo/promptfoo",
+      "allowed_for": [
+        "implementation",
+        "evaluation"
+      ],
+      "preferred_action": "convert-to-skill",
+      "reason": "High leverage eval harness that can be wrapped behind an explicit Catfish skill contract."
+    },
+    {
+      "source_id": "d2",
+      "repo": "terrastruct/d2",
+      "allowed_for": [
+        "architecture-visualization",
+        "figure"
+      ],
+      "preferred_action": "clone-reference",
+      "reason": "Safe reference dependency for diagrams; useful but not a core runtime module."
+    }
+  ],
+  "blocked_items": [
+    {
+      "source_id": "openhands",
+      "repo": "OpenHands/OpenHands",
+      "reason": "Strong reference project, but too large and operationally heavy for auto-trial."
+    }
+  ]
+}

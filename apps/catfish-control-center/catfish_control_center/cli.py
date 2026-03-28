@@ -20,6 +20,9 @@ VIEW_CHOICES = (
     "recent-launches",
     "capability-summaries",
     "diversity-metrics",
+    "experience-reports",
+    "global-optimization",
+    "module-scouts",
     "recent-events",
 )
 

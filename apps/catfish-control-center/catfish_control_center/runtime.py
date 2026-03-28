@@ -16,7 +16,13 @@ from .models import (
     ControlSnapshot,
     DiversityMetric,
     GuardrailState,
+    ExperienceArtifact,
+    ExperienceReport,
     LaunchRecord,
+    ModuleScoutCandidate,
+    ModuleScoutContract,
+    OptimizationTask,
+    OptimizationWorkerState,
     ProjectState,
     ProviderState,
     ReviewTask,
@@ -33,6 +39,9 @@ DEFAULT_PROVIDER_REGISTRY_PATH = REPO_ROOT / "assets" / "router" / "catfish_prov
 DEFAULT_PROVIDER_HEALTH_PATH = REPO_ROOT / "assets" / "router" / "catfish_provider_health_20260325.json"
 DEFAULT_CAPABILITY_LEDGER_PATH = REPO_ROOT / "assets" / "router" / "catfish_capability_ledger.json"
 DEFAULT_GUARDRAIL_POLICY_PATH = REPO_ROOT / "assets" / "catfish_policy" / "catfish_runtime_guardrail.example.json"
+DEFAULT_EXTERNAL_REPO_MANIFEST_PATH = (
+    REPO_ROOT / "assets" / "external_repos" / "catfish_external_repo_manifest_20260325.json"
+)
 
 
 def load_snapshot(snapshot_path: Path) -> ControlSnapshot:
@@ -46,6 +55,7 @@ def load_live_state(state_root: Path) -> ControlSnapshot:
     scheduler_state = _load_optional_json(system_root / "scheduler_state.json", default={})
     dispatch_state = _load_optional_json(system_root / "dispatch_queue.json", default={})
     review_state = _load_optional_json(system_root / "review_queue.json", default={})
+    self_optimization_state = _load_optional_json(system_root / "self_optimization.json", default={})
     provider_registry = _load_optional_json(
         system_root / "provider_registry.json",
         default=_load_optional_json(DEFAULT_PROVIDER_REGISTRY_PATH, default={}),
@@ -66,6 +76,10 @@ def load_live_state(state_root: Path) -> ControlSnapshot:
     resource_manager_state = _load_optional_json(system_root / "resource_manager_state.json", default={})
     agentdoc_state = _load_optional_json(system_root / "agentdoc_state.json", default={})
     supervisor_state_payload = _load_optional_json(system_root / "supervisor_state.json", default={})
+    external_repo_manifest = _load_optional_json(
+        system_root / "external_repo_manifest.json",
+        default=_load_optional_json(DEFAULT_EXTERNAL_REPO_MANIFEST_PATH, default={}),
+    )
 
     project_dirs = sorted(
         [path for path in projects_root.iterdir() if path.is_dir()],
@@ -83,6 +97,8 @@ def load_live_state(state_root: Path) -> ControlSnapshot:
     }
     capability_summaries: list[CapabilitySummaryState] = _load_provider_capability_summaries(capability_ledger)
     diversity_metrics: list[DiversityMetric] = []
+    experience_artifacts: list[ExperienceArtifact] = []
+    subject_labels: dict[tuple[str, str, str, str], str] = {}
 
     pending_reviews_by_project: dict[str, int] = defaultdict(int)
     for review in pending_reviews:
@@ -108,6 +124,18 @@ def load_live_state(state_root: Path) -> ControlSnapshot:
         project_launches = _build_runtime_launches(project_id, manifest, project_snapshot, node_lookup)
         project_reviews = _build_runtime_review_tasks(project_id, project_competitions)
         project_branches = _build_branch_scores(project_id, manifest, project_snapshot)
+        subject_labels[("project", project_id, "project", project_id)] = _first_str(
+            manifest.get("label"),
+            manifest.get("title"),
+            project_snapshot.get("project", {}).get("title", ""),
+            project_id,
+        )
+        for node_id, node in node_lookup.items():
+            subject_labels[("project", project_id, "agent", node_id)] = str(node.get("label", node_id))
+        for competition in project_competitions:
+            subject_labels[("project", project_id, "competition", competition.competition_id)] = (
+                competition.stage_label or competition.competition_id
+            )
 
         agents.extend(project_agents)
         stage_competitions.extend(project_competitions)
@@ -115,6 +143,18 @@ def load_live_state(state_root: Path) -> ControlSnapshot:
         events.extend(project_events)
         branches.extend(project_branches)
         diversity_metrics.extend(_build_diversity_metrics(project_competitions))
+        experience_artifacts.extend(
+            _build_project_experience_artifacts(
+                project_id=project_id,
+                manifest=manifest,
+                project_snapshot=project_snapshot,
+                node_lookup=node_lookup,
+                competitions=project_competitions,
+                branch_scores=project_branches,
+                project_label=subject_labels[("project", project_id, "project", project_id)],
+                extra_artifacts=_load_project_experience_artifacts(project_dir, project_id=project_id),
+            )
+        )
 
         for launch in project_launches:
             launches.setdefault(launch.launch_id, launch)
@@ -184,6 +224,47 @@ def load_live_state(state_root: Path) -> ControlSnapshot:
             )
         )
 
+    optimization_workers = _load_optimization_workers(self_optimization_state)
+    optimization_tasks = _load_optimization_tasks(self_optimization_state)
+    module_scout_contracts = _load_module_scout_contracts(self_optimization_state)
+    module_scout_candidates = _load_module_scout_candidates(
+        self_optimization_state=self_optimization_state,
+        external_repo_manifest=external_repo_manifest,
+        contracts=module_scout_contracts,
+    )
+
+    global_scope = _first_str(
+        self_optimization_state.get("globalId"),
+        self_optimization_state.get("global_id"),
+        "catfish-research",
+    )
+    subject_labels[("global", "", "global", global_scope)] = _first_str(
+        self_optimization_state.get("label"),
+        "CatfishResearch",
+    )
+    for worker in optimization_workers:
+        subject_labels[("global", "", "worker", worker.worker_id)] = worker.label
+    for contract in module_scout_contracts:
+        subject_labels[("global", "", "scout", contract.contract_id)] = contract.module_label or contract.module_id
+    for candidate in module_scout_candidates:
+        subject_labels[("global", "", "module", candidate.source_id)] = candidate.title or candidate.source_id
+
+    experience_artifacts.extend(
+        _load_global_experience_artifacts(
+            self_optimization_state=self_optimization_state,
+            global_scope=global_scope,
+        )
+    )
+    experience_artifacts.extend(
+        _build_module_scout_experience_artifacts(
+            candidates=module_scout_candidates,
+            contracts=module_scout_contracts,
+            optimization_workers=optimization_workers,
+            global_scope=global_scope,
+        )
+    )
+    experience_reports = aggregate_experience_reports(experience_artifacts, subject_labels=subject_labels)
+
     providers = _build_provider_states(
         provider_registry=provider_registry,
         provider_health=provider_health,
@@ -220,11 +301,13 @@ def load_live_state(state_root: Path) -> ControlSnapshot:
             "scheduler_state": str(system_root / "scheduler_state.json"),
             "dispatch_queue": str(system_root / "dispatch_queue.json"),
             "review_queue": str(system_root / "review_queue.json"),
+            "self_optimization": str(system_root / "self_optimization.json"),
             "runtime_policy": str(system_root / "catfish_runtime_policy.json"),
             "runtime_metrics": str(system_root / "runtime_metrics.json"),
             "resource_manager_state": str(system_root / "resource_manager_state.json"),
             "agentdoc_state": str(system_root / "agentdoc_state.json"),
             "supervisor_state": str(system_root / "supervisor_state.json"),
+            "external_repo_manifest": str(system_root / "external_repo_manifest.json"),
         },
     }
     if not generated_at:
@@ -258,6 +341,24 @@ def load_live_state(state_root: Path) -> ControlSnapshot:
         diversity_metrics=tuple(sorted(diversity_metrics, key=lambda item: (item.project_id, item.stage_id, item.metric_id))),
         guardrail_state=guardrail_state,
         supervisor_state=supervisor_state,
+        experience_artifacts=tuple(
+            sorted(
+                experience_artifacts,
+                key=lambda item: (item.scope, item.project_id, item.updated_at, item.level_kind, item.subject_id, item.artifact_id),
+            )
+        ),
+        experience_reports=tuple(
+            sorted(
+                experience_reports,
+                key=lambda item: (item.scope, item.project_id, item.depth, item.level_kind, item.subject_id),
+            )
+        ),
+        optimization_workers=tuple(sorted(optimization_workers, key=lambda item: item.worker_id)),
+        optimization_tasks=tuple(sorted(optimization_tasks, key=lambda item: (item.status, item.priority, item.task_id))),
+        module_scout_contracts=tuple(sorted(module_scout_contracts, key=lambda item: item.contract_id)),
+        module_scout_candidates=tuple(
+            sorted(module_scout_candidates, key=lambda item: (-item.total_score, item.decision, item.candidate_id))
+        ),
         metadata=metadata,
     )
 
@@ -265,6 +366,189 @@ def load_live_state(state_root: Path) -> ControlSnapshot:
 def merge_recent_events(snapshot: ControlSnapshot, events: list[ControlEvent]) -> ControlSnapshot:
     merged = tuple(sorted((*snapshot.events, *events), key=lambda event: event.timestamp))
     return replace(snapshot, events=merged)
+
+
+def evaluate_module_scout_candidate(
+    contract: ModuleScoutContract,
+    candidate: ModuleScoutCandidate,
+    *,
+    allowlisted_source_ids: set[str] | None = None,
+) -> ModuleScoutCandidate:
+    allowlisted_sources = allowlisted_source_ids or set(contract.allowed_source_ids)
+    metadata = dict(candidate.metadata)
+    novelty_score = candidate.novelty_score or float(metadata.get("novelty_score", metadata.get("novelty", 0.0)))
+    quality_score = candidate.quality_score or float(metadata.get("quality_score", metadata.get("quality", 0.0)))
+    fit_score = candidate.fit_score or float(metadata.get("fit_score", metadata.get("fit", 0.0)))
+    operational_score = candidate.operational_score or float(
+        metadata.get("operational_score", metadata.get("operational", 0.0))
+    )
+    total_score = round(
+        (0.2 * novelty_score) + (0.35 * quality_score) + (0.3 * fit_score) + (0.15 * operational_score),
+        4,
+    )
+
+    allowlisted = bool(candidate.allowlisted or candidate.source_id in allowlisted_sources)
+    install_policy = candidate.install_policy or "deny"
+    safe_mode_allowed = install_policy in set(contract.safe_install_modes)
+    rationale: list[str] = []
+
+    if allowlisted:
+        rationale.append("source is present in the explicit scout allowlist")
+    else:
+        rationale.append("source is outside the explicit scout allowlist")
+
+    if safe_mode_allowed:
+        rationale.append(f"install policy {install_policy} is permitted by the scout contract")
+    else:
+        rationale.append(f"install policy {install_policy} is not permitted by the scout contract")
+
+    decision = "reject"
+    status = "screened"
+    install_attempt_status = "blocked"
+    if allowlisted and safe_mode_allowed and total_score >= 0.7:
+        if candidate.conversion_target == "skill":
+            decision = "attempt-convert-to-skill"
+        else:
+            decision = "attempt-install"
+        status = "ready"
+        install_attempt_status = "eligible"
+        rationale.append("candidate exceeded the auto-trial score threshold")
+    elif allowlisted and total_score >= 0.55:
+        decision = "queue-for-review"
+        status = "queued"
+        install_attempt_status = "pending-review"
+        rationale.append("candidate is promising but stays behind explicit review")
+    else:
+        rationale.append("candidate did not clear the adoption threshold")
+
+    install_contract = dict(candidate.install_contract)
+    install_contract.setdefault("allowlist_manifest", contract.allowlist_manifest)
+    install_contract.setdefault("require_human_review", contract.require_human_review)
+    install_contract.setdefault("safe_install_modes", list(contract.safe_install_modes))
+
+    return replace(
+        candidate,
+        allowlisted=allowlisted,
+        status=status,
+        total_score=total_score,
+        novelty_score=novelty_score,
+        quality_score=quality_score,
+        fit_score=fit_score,
+        operational_score=operational_score,
+        decision=decision,
+        install_attempt_status=install_attempt_status,
+        rationale=tuple(rationale),
+        install_contract=install_contract,
+        summary=candidate.summary or "Scout candidate evaluated for safe Catfish self-optimization.",
+    )
+
+
+def aggregate_experience_reports(
+    artifacts: list[ExperienceArtifact] | tuple[ExperienceArtifact, ...],
+    *,
+    subject_labels: dict[tuple[str, str, str, str], str] | None = None,
+) -> list[ExperienceReport]:
+    labels = subject_labels or {}
+    node_state: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+
+    for artifact in artifacts:
+        path = tuple(item for item in artifact.hierarchy_path if item)
+        if not path:
+            path = (f"{artifact.level_kind}:{artifact.subject_id}",)
+
+        parent_key: tuple[str, str, str, str] | None = None
+        for depth, token in enumerate(path):
+            level_kind, subject_id = _parse_hierarchy_token(token)
+            key = (artifact.scope, artifact.project_id, level_kind, subject_id)
+            path_prefix = path[: depth + 1]
+            label = labels.get(key, subject_id)
+            if depth == len(path) - 1 and artifact.subject_label:
+                label = artifact.subject_label
+            state = node_state.setdefault(
+                key,
+                {
+                    "label": label,
+                    "parent_key": parent_key,
+                    "depth": depth,
+                    "hierarchy_path": path_prefix,
+                    "artifact_ids": [],
+                    "child_keys": set(),
+                    "direct_weighted_sum": 0.0,
+                    "direct_weight_total": 0.0,
+                    "direct_artifact_count": 0,
+                    "sample_count": 0,
+                    "updated_at": "",
+                },
+            )
+            state["label"] = label or state["label"]
+            state["parent_key"] = parent_key
+            state["depth"] = min(state["depth"], depth)
+            state["hierarchy_path"] = path_prefix
+            if parent_key is not None:
+                node_state[parent_key]["child_keys"].add(key)
+            parent_key = key
+
+        leaf_key = parent_key
+        if leaf_key is None:
+            continue
+        leaf = node_state[leaf_key]
+        leaf["artifact_ids"].append(artifact.artifact_id)
+        leaf["direct_weighted_sum"] += artifact.direct_score * max(artifact.weight, 0.0)
+        leaf["direct_weight_total"] += max(artifact.weight, 0.0)
+        leaf["direct_artifact_count"] += 1
+        leaf["sample_count"] += max(artifact.sample_count, 0)
+        leaf["updated_at"] = _max_timestamp([leaf["updated_at"], artifact.updated_at])
+
+    reports_by_key: dict[tuple[str, str, str, str], ExperienceReport] = {}
+    keys_by_depth = sorted(node_state, key=lambda item: node_state[item]["depth"], reverse=True)
+    for key in keys_by_depth:
+        state = node_state[key]
+        child_reports = [reports_by_key[child_key] for child_key in sorted(state["child_keys"])]
+        direct_score = 0.0
+        if state["direct_weight_total"] > 0:
+            direct_score = state["direct_weighted_sum"] / state["direct_weight_total"]
+
+        direct_samples = state["sample_count"]
+        child_samples = sum(max(child.total_sample_count, 1) for child in child_reports)
+        total_samples = direct_samples + child_samples
+        numerator = direct_score * direct_samples
+        numerator += sum(child.aggregated_score * max(child.total_sample_count, 1) for child in child_reports)
+        aggregated_score = numerator / total_samples if total_samples else direct_score
+        confidence = min(1.0, 0.35 + (0.1 * state["direct_artifact_count"]) + (0.08 * len(child_reports)))
+        project_id = key[1]
+        summary = (
+            f"{state['label']} aggregates {state['direct_artifact_count']} direct artifacts "
+            f"and {len(child_reports)} child reports."
+        )
+        report_id = f"experience:{key[0]}:{project_id or 'global'}:{key[2]}:{key[3]}"
+        parent_report_id = ""
+        if state["parent_key"] is not None:
+            parent_key = state["parent_key"]
+            parent_report_id = f"experience:{parent_key[0]}:{parent_key[1] or 'global'}:{parent_key[2]}:{parent_key[3]}"
+
+        reports_by_key[key] = ExperienceReport(
+            report_id=report_id,
+            scope=key[0],
+            project_id=project_id,
+            level_kind=key[2],
+            subject_id=key[3],
+            subject_label=state["label"],
+            parent_report_id=parent_report_id,
+            depth=state["depth"],
+            direct_artifact_count=state["direct_artifact_count"],
+            child_report_count=len(child_reports),
+            total_sample_count=total_samples,
+            direct_score=round(direct_score, 4),
+            aggregated_score=round(aggregated_score, 4),
+            confidence=round(confidence, 4),
+            updated_at=state["updated_at"],
+            summary=summary,
+            artifact_ids=tuple(sorted(state["artifact_ids"])),
+            child_report_ids=tuple(sorted(child.report_id for child in child_reports)),
+            hierarchy_path=tuple(state["hierarchy_path"]),
+        )
+
+    return list(reports_by_key.values())
 
 
 def _load_route_preview_module() -> Any:
@@ -847,11 +1131,308 @@ def _build_diversity_metrics(competitions: list[StageCompetition]) -> list[Diver
     return metrics
 
 
+def _load_project_experience_artifacts(project_dir: Path, *, project_id: str) -> list[ExperienceArtifact]:
+    path = project_dir / "experience_log.json"
+    if not path.exists():
+        return []
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(payload, dict):
+        items = payload.get("artifacts", [])
+    else:
+        items = payload
+    built: list[ExperienceArtifact] = []
+    for index, item in enumerate(items, start=1):
+        record = dict(item)
+        record.setdefault("artifact_id", f"{project_id}:experience:{index}")
+        record.setdefault("scope", "project")
+        record.setdefault("project_id", project_id)
+        built.append(ExperienceArtifact.from_dict(record))
+    return built
+
+
+def _build_project_experience_artifacts(
+    *,
+    project_id: str,
+    manifest: dict[str, Any],
+    project_snapshot: dict[str, Any],
+    node_lookup: dict[str, dict[str, Any]],
+    competitions: list[StageCompetition],
+    branch_scores: list[BranchScore],
+    project_label: str,
+    extra_artifacts: list[ExperienceArtifact],
+) -> list[ExperienceArtifact]:
+    built: list[ExperienceArtifact] = list(extra_artifacts)
+    runs = project_snapshot.get("runs", {})
+
+    for run_id, run in sorted(runs.items(), key=lambda item: item[1].get("submitted_at", "")):
+        if run.get("parent_score") in (None, ""):
+            continue
+        node_id = str(run.get("node_id", ""))
+        node = node_lookup.get(node_id, {})
+        stage_id = _first_str(
+            (run.get("metadata") or {}).get("stageId"),
+            (run.get("metadata") or {}).get("stage_id"),
+            manifest.get("currentStage"),
+            manifest.get("current_stage"),
+            "unknown-stage",
+        )
+        hierarchy_path = _project_hierarchy_path(project_id, node_id=node_id, node_lookup=node_lookup)
+        built.append(
+            ExperienceArtifact(
+                artifact_id=f"{project_id}:run:{run_id}",
+                scope="project",
+                project_id=project_id,
+                level_kind="agent",
+                subject_id=node_id,
+                subject_label=str(node.get("label", node_id)),
+                report_kind="competition-run",
+                direct_score=_normalized_score(run.get("parent_score")),
+                sample_count=1,
+                parent_subject_id=str(node.get("parent_node_id") or ""),
+                hierarchy_path=hierarchy_path,
+                updated_at=str(run.get("submitted_at", "")),
+                summary=f"Parent scored {node.get('label', node_id)} on the {stage_id} stage.",
+                evidence_refs=(str(run.get("competition_id", "")), _first_str((run.get("metadata") or {}).get("branch"))),
+                metadata={
+                    "stage_id": stage_id,
+                    "run_id": str(run.get("run_id", run_id)),
+                    "competition_id": str(run.get("competition_id", "")),
+                },
+            )
+        )
+
+    for competition in competitions:
+        maturity = 0.0
+        if competition.run_count > 0:
+            maturity = competition.scored_run_count / max(competition.run_count, 1)
+        elif competition.candidate_count > 0:
+            maturity = 0.25
+        hierarchy_path = _project_hierarchy_path(
+            project_id,
+            node_id=competition.parent_id,
+            node_lookup=node_lookup,
+            leaf_token=f"competition:{competition.competition_id}",
+        )
+        built.append(
+            ExperienceArtifact(
+                artifact_id=f"{project_id}:competition:{competition.competition_id}",
+                scope="project",
+                project_id=project_id,
+                level_kind="competition",
+                subject_id=competition.competition_id,
+                subject_label=competition.stage_label or competition.competition_id,
+                report_kind="stage-competition",
+                direct_score=round(competition.leading_score * maturity, 4),
+                weight=max(competition.candidate_count, 1),
+                sample_count=max(competition.scored_run_count, 1 if competition.candidate_count else 0),
+                parent_subject_id=competition.parent_id,
+                hierarchy_path=hierarchy_path,
+                updated_at=competition.last_activity_at,
+                summary=competition.summary,
+                evidence_refs=(competition.stage_id, competition.winner_run_id),
+                metadata={
+                    "advancement_mode": competition.advancement_mode,
+                    "candidate_count": competition.candidate_count,
+                    "pending_runs": competition.pending_runs,
+                },
+            )
+        )
+
+    if branch_scores:
+        best_branch = max(branch_scores, key=lambda item: _normalized_score(item.score))
+        project_score = sum(_normalized_score(item.score) for item in branch_scores) / len(branch_scores)
+        built.append(
+            ExperienceArtifact(
+                artifact_id=f"{project_id}:project:branch-frontier",
+                scope="project",
+                project_id=project_id,
+                level_kind="project",
+                subject_id=project_id,
+                subject_label=project_label,
+                report_kind="branch-frontier",
+                direct_score=round(project_score, 4),
+                weight=len(branch_scores),
+                sample_count=len(branch_scores),
+                hierarchy_path=(f"project:{project_id}",),
+                updated_at=_max_timestamp(
+                    [
+                        str(project_snapshot.get("generated_at", "")),
+                        _first_str(manifest.get("updatedAt"), manifest.get("updated_at")),
+                    ]
+                ),
+                summary=f"Project frontier is led by {best_branch.branch}.",
+                evidence_refs=tuple(item.branch for item in branch_scores),
+                metadata={"leading_branch": best_branch.branch},
+            )
+        )
+    return built
+
+
+def _load_optimization_workers(self_optimization_state: dict[str, Any]) -> list[OptimizationWorkerState]:
+    workers = self_optimization_state.get("workers")
+    if not isinstance(workers, list):
+        worker = self_optimization_state.get("worker")
+        workers = [worker] if worker else []
+    return [OptimizationWorkerState.from_dict(item) for item in workers if isinstance(item, dict)]
+
+
+def _load_optimization_tasks(self_optimization_state: dict[str, Any]) -> list[OptimizationTask]:
+    return [
+        OptimizationTask.from_dict(item)
+        for item in self_optimization_state.get("queue", [])
+        if isinstance(item, dict)
+    ]
+
+
+def _load_module_scout_contracts(self_optimization_state: dict[str, Any]) -> list[ModuleScoutContract]:
+    return [
+        ModuleScoutContract.from_dict(item)
+        for item in self_optimization_state.get("module_scout_contracts", [])
+        if isinstance(item, dict)
+    ]
+
+
+def _load_module_scout_candidates(
+    *,
+    self_optimization_state: dict[str, Any],
+    external_repo_manifest: dict[str, Any],
+    contracts: list[ModuleScoutContract],
+) -> list[ModuleScoutCandidate]:
+    manifest_allowlist = {
+        str(item.get("id", ""))
+        for item in external_repo_manifest.get("items", [])
+        if str(item.get("recommended_action", "")).startswith("adopt_external")
+        or str(item.get("recommended_action", "")) == "future_vendor_pilot"
+    }
+    allowlist_by_contract = {
+        contract.contract_id: set(contract.allowed_source_ids) | set(manifest_allowlist)
+        for contract in contracts
+    }
+
+    built: list[ModuleScoutCandidate] = []
+    for item in self_optimization_state.get("module_scout_candidates", []):
+        if not isinstance(item, dict):
+            continue
+        candidate = ModuleScoutCandidate.from_dict(item)
+        contract = next((entry for entry in contracts if entry.contract_id == candidate.contract_id), None)
+        if contract is None:
+            built.append(candidate)
+            continue
+        built.append(
+            evaluate_module_scout_candidate(
+                contract,
+                candidate,
+                allowlisted_source_ids=allowlist_by_contract.get(contract.contract_id, set()),
+            )
+        )
+    return built
+
+
+def _load_global_experience_artifacts(
+    *,
+    self_optimization_state: dict[str, Any],
+    global_scope: str,
+) -> list[ExperienceArtifact]:
+    built: list[ExperienceArtifact] = []
+    for index, item in enumerate(self_optimization_state.get("experience_artifacts", []), start=1):
+        if not isinstance(item, dict):
+            continue
+        payload = dict(item)
+        payload.setdefault("artifact_id", f"{global_scope}:global-experience:{index}")
+        payload.setdefault("scope", "global")
+        payload.setdefault("project_id", "")
+        built.append(ExperienceArtifact.from_dict(payload))
+    return built
+
+
+def _build_module_scout_experience_artifacts(
+    *,
+    candidates: list[ModuleScoutCandidate],
+    contracts: list[ModuleScoutContract],
+    optimization_workers: list[OptimizationWorkerState],
+    global_scope: str,
+) -> list[ExperienceArtifact]:
+    built: list[ExperienceArtifact] = []
+    contract_by_id = {item.contract_id: item for item in contracts}
+    worker_id = optimization_workers[0].worker_id if optimization_workers else "catfish-self-optimizer"
+    for candidate in candidates:
+        contract = contract_by_id.get(candidate.contract_id)
+        if contract is None:
+            continue
+        built.append(
+            ExperienceArtifact(
+                artifact_id=f"{global_scope}:scout:{candidate.candidate_id}",
+                scope="global",
+                project_id="",
+                level_kind="module",
+                subject_id=candidate.source_id,
+                subject_label=candidate.title or candidate.source_id,
+                report_kind="module-scout",
+                direct_score=candidate.total_score,
+                weight=1.0,
+                sample_count=1,
+                parent_subject_id=worker_id,
+                hierarchy_path=(
+                    f"global:{global_scope}",
+                    f"worker:{worker_id}",
+                    f"scout:{contract.contract_id}",
+                    f"module:{candidate.source_id}",
+                ),
+                updated_at=_first_str(
+                    candidate.metadata.get("updated_at"),
+                    contract.created_at,
+                ),
+                summary=candidate.summary or contract.summary,
+                evidence_refs=(candidate.source_url, candidate.competition_id, candidate.score_entry_id),
+                metadata={
+                    "decision": candidate.decision,
+                    "install_attempt_status": candidate.install_attempt_status,
+                    "contract_id": contract.contract_id,
+                },
+            )
+        )
+    return built
+
+
 def _project_stage_from_competitions(competitions: list[StageCompetition]) -> str:
     if not competitions:
         return ""
     newest = max(competitions, key=lambda item: item.last_activity_at or "")
     return newest.stage_id
+
+
+def _project_hierarchy_path(
+    project_id: str,
+    *,
+    node_id: str,
+    node_lookup: dict[str, dict[str, Any]],
+    leaf_token: str | None = None,
+) -> tuple[str, ...]:
+    tokens = [f"project:{project_id}"]
+    lineage: list[str] = []
+    current_id = node_id
+    seen: set[str] = set()
+    while current_id and current_id not in seen:
+        seen.add(current_id)
+        lineage.append(f"agent:{current_id}")
+        current_id = str(node_lookup.get(current_id, {}).get("parent_node_id") or "")
+    tokens.extend(reversed(lineage))
+    if leaf_token:
+        tokens.append(leaf_token)
+    return tuple(tokens)
+
+
+def _parse_hierarchy_token(token: str) -> tuple[str, str]:
+    if ":" not in token:
+        return "unknown", token
+    return token.split(":", 1)
+
+
+def _normalized_score(value: Any) -> float:
+    score = float(value or 0.0)
+    if score > 1.0:
+        score /= 100.0
+    return max(0.0, min(score, 1.0))
 
 
 def _first_str(*values: Any) -> str:

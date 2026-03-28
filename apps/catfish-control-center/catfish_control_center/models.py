@@ -584,6 +584,286 @@ class SupervisorState:
 
 
 @dataclass(frozen=True)
+class ExperienceArtifact:
+    artifact_id: str
+    scope: str
+    project_id: str
+    level_kind: str
+    subject_id: str
+    subject_label: str
+    report_kind: str
+    direct_score: float
+    weight: float = 1.0
+    sample_count: int = 1
+    parent_subject_id: str = ""
+    hierarchy_path: tuple[str, ...] = field(default_factory=tuple)
+    updated_at: str = ""
+    summary: str = ""
+    evidence_refs: tuple[str, ...] = field(default_factory=tuple)
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ExperienceArtifact":
+        return cls(
+            artifact_id=str(data["artifact_id"]),
+            scope=str(data.get("scope", "project")),
+            project_id=str(data.get("project_id", "")),
+            level_kind=str(data.get("level_kind", "agent")),
+            subject_id=str(data.get("subject_id", "")),
+            subject_label=str(data.get("subject_label", "")),
+            report_kind=str(data.get("report_kind", "execution")),
+            direct_score=_float(data.get("direct_score")),
+            weight=_float(data.get("weight"), default=1.0),
+            sample_count=_int(data.get("sample_count"), default=1),
+            parent_subject_id=str(data.get("parent_subject_id", "")),
+            hierarchy_path=_str_list(data.get("hierarchy_path")),
+            updated_at=str(data.get("updated_at", "")),
+            summary=str(data.get("summary", "")),
+            evidence_refs=_str_list(data.get("evidence_refs")),
+            metadata=dict(data.get("metadata", {})),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        payload = asdict(self)
+        payload["hierarchy_path"] = list(self.hierarchy_path)
+        payload["evidence_refs"] = list(self.evidence_refs)
+        return payload
+
+
+@dataclass(frozen=True)
+class ExperienceReport:
+    report_id: str
+    scope: str
+    project_id: str
+    level_kind: str
+    subject_id: str
+    subject_label: str
+    parent_report_id: str
+    depth: int
+    direct_artifact_count: int
+    child_report_count: int
+    total_sample_count: int
+    direct_score: float
+    aggregated_score: float
+    confidence: float = 0.0
+    updated_at: str = ""
+    summary: str = ""
+    artifact_ids: tuple[str, ...] = field(default_factory=tuple)
+    child_report_ids: tuple[str, ...] = field(default_factory=tuple)
+    hierarchy_path: tuple[str, ...] = field(default_factory=tuple)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ExperienceReport":
+        return cls(
+            report_id=str(data["report_id"]),
+            scope=str(data.get("scope", "project")),
+            project_id=str(data.get("project_id", "")),
+            level_kind=str(data.get("level_kind", "agent")),
+            subject_id=str(data.get("subject_id", "")),
+            subject_label=str(data.get("subject_label", "")),
+            parent_report_id=str(data.get("parent_report_id", "")),
+            depth=_int(data.get("depth")),
+            direct_artifact_count=_int(data.get("direct_artifact_count")),
+            child_report_count=_int(data.get("child_report_count")),
+            total_sample_count=_int(data.get("total_sample_count")),
+            direct_score=_float(data.get("direct_score")),
+            aggregated_score=_float(data.get("aggregated_score")),
+            confidence=_float(data.get("confidence")),
+            updated_at=str(data.get("updated_at", "")),
+            summary=str(data.get("summary", "")),
+            artifact_ids=_str_list(data.get("artifact_ids")),
+            child_report_ids=_str_list(data.get("child_report_ids")),
+            hierarchy_path=_str_list(data.get("hierarchy_path")),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        payload = asdict(self)
+        payload["artifact_ids"] = list(self.artifact_ids)
+        payload["child_report_ids"] = list(self.child_report_ids)
+        payload["hierarchy_path"] = list(self.hierarchy_path)
+        return payload
+
+
+@dataclass(frozen=True)
+class OptimizationWorkerState:
+    worker_id: str
+    label: str
+    status: str
+    queue_name: str
+    active_task_id: str = ""
+    completed_tasks: int = 0
+    last_heartbeat_at: str = ""
+    summary: str = ""
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "OptimizationWorkerState":
+        return cls(
+            worker_id=str(data["worker_id"]),
+            label=str(data.get("label", data["worker_id"])),
+            status=str(data.get("status", "idle")),
+            queue_name=str(data.get("queue_name", "self-optimization")),
+            active_task_id=str(data.get("active_task_id", "")),
+            completed_tasks=_int(data.get("completed_tasks")),
+            last_heartbeat_at=str(data.get("last_heartbeat_at", "")),
+            summary=str(data.get("summary", "")),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class OptimizationTask:
+    task_id: str
+    queue_name: str
+    scope: str
+    status: str
+    priority: str
+    objective: str
+    target_kind: str
+    source_report_id: str = ""
+    project_id: str = ""
+    competition_id: str = ""
+    candidate_ids: tuple[str, ...] = field(default_factory=tuple)
+    created_at: str = ""
+    updated_at: str = ""
+    summary: str = ""
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "OptimizationTask":
+        return cls(
+            task_id=str(data["task_id"]),
+            queue_name=str(data.get("queue_name", "self-optimization")),
+            scope=str(data.get("scope", "global")),
+            status=str(data.get("status", "pending")),
+            priority=str(data.get("priority", "medium")),
+            objective=str(data.get("objective", "")),
+            target_kind=str(data.get("target_kind", "self-improvement")),
+            source_report_id=str(data.get("source_report_id", "")),
+            project_id=str(data.get("project_id", "")),
+            competition_id=str(data.get("competition_id", "")),
+            candidate_ids=_str_list(data.get("candidate_ids")),
+            created_at=str(data.get("created_at", "")),
+            updated_at=str(data.get("updated_at", "")),
+            summary=str(data.get("summary", "")),
+            metadata=dict(data.get("metadata", {})),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        payload = asdict(self)
+        payload["candidate_ids"] = list(self.candidate_ids)
+        return payload
+
+
+@dataclass(frozen=True)
+class ModuleScoutContract:
+    contract_id: str
+    module_id: str
+    module_label: str
+    capability: str
+    project_id: str = ""
+    search_query: str = ""
+    allowlist_manifest: str = ""
+    allowed_source_ids: tuple[str, ...] = field(default_factory=tuple)
+    safe_install_modes: tuple[str, ...] = field(default_factory=tuple)
+    max_candidates: int = 0
+    require_explicit_allowlist: bool = True
+    require_human_review: bool = True
+    created_at: str = ""
+    summary: str = ""
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ModuleScoutContract":
+        return cls(
+            contract_id=str(data["contract_id"]),
+            module_id=str(data.get("module_id", "")),
+            module_label=str(data.get("module_label", "")),
+            capability=str(data.get("capability", "")),
+            project_id=str(data.get("project_id", "")),
+            search_query=str(data.get("search_query", "")),
+            allowlist_manifest=str(data.get("allowlist_manifest", "")),
+            allowed_source_ids=_str_list(data.get("allowed_source_ids")),
+            safe_install_modes=_str_list(data.get("safe_install_modes")),
+            max_candidates=_int(data.get("max_candidates")),
+            require_explicit_allowlist=bool(data.get("require_explicit_allowlist", True)),
+            require_human_review=bool(data.get("require_human_review", True)),
+            created_at=str(data.get("created_at", "")),
+            summary=str(data.get("summary", "")),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        payload = asdict(self)
+        payload["allowed_source_ids"] = list(self.allowed_source_ids)
+        payload["safe_install_modes"] = list(self.safe_install_modes)
+        return payload
+
+
+@dataclass(frozen=True)
+class ModuleScoutCandidate:
+    candidate_id: str
+    contract_id: str
+    source_kind: str
+    source_id: str
+    title: str
+    capability: str
+    project_id: str = ""
+    source_url: str = ""
+    status: str = "discovered"
+    allowlisted: bool = False
+    install_policy: str = "deny"
+    conversion_target: str = ""
+    install_attempt_status: str = "not-attempted"
+    competition_id: str = ""
+    score_entry_id: str = ""
+    total_score: float = 0.0
+    novelty_score: float = 0.0
+    quality_score: float = 0.0
+    fit_score: float = 0.0
+    operational_score: float = 0.0
+    decision: str = ""
+    rationale: tuple[str, ...] = field(default_factory=tuple)
+    install_contract: dict[str, Any] = field(default_factory=dict)
+    summary: str = ""
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ModuleScoutCandidate":
+        return cls(
+            candidate_id=str(data["candidate_id"]),
+            contract_id=str(data.get("contract_id", "")),
+            source_kind=str(data.get("source_kind", "repo")),
+            source_id=str(data.get("source_id", "")),
+            title=str(data.get("title", "")),
+            capability=str(data.get("capability", "")),
+            project_id=str(data.get("project_id", "")),
+            source_url=str(data.get("source_url", "")),
+            status=str(data.get("status", "discovered")),
+            allowlisted=bool(data.get("allowlisted", False)),
+            install_policy=str(data.get("install_policy", "deny")),
+            conversion_target=str(data.get("conversion_target", "")),
+            install_attempt_status=str(data.get("install_attempt_status", "not-attempted")),
+            competition_id=str(data.get("competition_id", "")),
+            score_entry_id=str(data.get("score_entry_id", "")),
+            total_score=_float(data.get("total_score")),
+            novelty_score=_float(data.get("novelty_score")),
+            quality_score=_float(data.get("quality_score")),
+            fit_score=_float(data.get("fit_score")),
+            operational_score=_float(data.get("operational_score")),
+            decision=str(data.get("decision", "")),
+            rationale=_str_list(data.get("rationale")),
+            install_contract=dict(data.get("install_contract", {})),
+            summary=str(data.get("summary", "")),
+            metadata=dict(data.get("metadata", {})),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        payload = asdict(self)
+        payload["rationale"] = list(self.rationale)
+        return payload
+
+
+@dataclass(frozen=True)
 class ControlSnapshot:
     generated_at: str
     projects: tuple[ProjectState, ...]
@@ -598,6 +878,12 @@ class ControlSnapshot:
     diversity_metrics: tuple[DiversityMetric, ...] = field(default_factory=tuple)
     guardrail_state: GuardrailState | None = None
     supervisor_state: SupervisorState | None = None
+    experience_artifacts: tuple[ExperienceArtifact, ...] = field(default_factory=tuple)
+    experience_reports: tuple[ExperienceReport, ...] = field(default_factory=tuple)
+    optimization_workers: tuple[OptimizationWorkerState, ...] = field(default_factory=tuple)
+    optimization_tasks: tuple[OptimizationTask, ...] = field(default_factory=tuple)
+    module_scout_contracts: tuple[ModuleScoutContract, ...] = field(default_factory=tuple)
+    module_scout_candidates: tuple[ModuleScoutCandidate, ...] = field(default_factory=tuple)
     route_preview: dict[str, Any] | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
@@ -621,6 +907,18 @@ class ControlSnapshot:
             diversity_metrics=tuple(DiversityMetric.from_dict(item) for item in data.get("diversity_metrics", [])),
             guardrail_state=GuardrailState.from_dict(data["guardrail_state"]) if data.get("guardrail_state") else None,
             supervisor_state=SupervisorState.from_dict(data["supervisor_state"]) if data.get("supervisor_state") else None,
+            experience_artifacts=tuple(ExperienceArtifact.from_dict(item) for item in data.get("experience_artifacts", [])),
+            experience_reports=tuple(ExperienceReport.from_dict(item) for item in data.get("experience_reports", [])),
+            optimization_workers=tuple(
+                OptimizationWorkerState.from_dict(item) for item in data.get("optimization_workers", [])
+            ),
+            optimization_tasks=tuple(OptimizationTask.from_dict(item) for item in data.get("optimization_tasks", [])),
+            module_scout_contracts=tuple(
+                ModuleScoutContract.from_dict(item) for item in data.get("module_scout_contracts", [])
+            ),
+            module_scout_candidates=tuple(
+                ModuleScoutCandidate.from_dict(item) for item in data.get("module_scout_candidates", [])
+            ),
             route_preview=dict(data["route_preview"]) if data.get("route_preview") else None,
             metadata=dict(data.get("metadata", {})),
         )
@@ -640,6 +938,12 @@ class ControlSnapshot:
             "diversity_metrics": [item.to_dict() for item in self.diversity_metrics],
             "guardrail_state": self.guardrail_state.to_dict() if self.guardrail_state else None,
             "supervisor_state": self.supervisor_state.to_dict() if self.supervisor_state else None,
+            "experience_artifacts": [item.to_dict() for item in self.experience_artifacts],
+            "experience_reports": [item.to_dict() for item in self.experience_reports],
+            "optimization_workers": [item.to_dict() for item in self.optimization_workers],
+            "optimization_tasks": [item.to_dict() for item in self.optimization_tasks],
+            "module_scout_contracts": [item.to_dict() for item in self.module_scout_contracts],
+            "module_scout_candidates": [item.to_dict() for item in self.module_scout_candidates],
             "route_preview": self.route_preview,
             "metadata": self.metadata,
         }

@@ -10,7 +10,11 @@ from .models import (
     ControlEvent,
     ControlSnapshot,
     DiversityMetric,
+    ExperienceReport,
     LaunchRecord,
+    ModuleScoutCandidate,
+    OptimizationTask,
+    OptimizationWorkerState,
     ReviewTask,
     StageCompetition,
 )
@@ -317,6 +321,100 @@ def render_supervisor_state(snapshot: ControlSnapshot) -> list[str]:
     return lines
 
 
+def render_experience_reports(snapshot: ControlSnapshot, limit: int = 16) -> list[str]:
+    lines: list[str] = []
+    ranked: list[ExperienceReport] = sorted(
+        snapshot.experience_reports,
+        key=lambda item: (item.scope, item.project_id, item.depth, -item.aggregated_score, item.report_id),
+    )[:limit]
+    for report in ranked:
+        lines.append(
+            "- "
+            f"{report.scope}:{report.subject_label or report.subject_id} "
+            f"level={report.level_kind} "
+            f"project={report.project_id or 'global'} "
+            f"depth={report.depth} "
+            f"direct={report.direct_score:.2f} "
+            f"aggregate={report.aggregated_score:.2f} "
+            f"artifacts={report.direct_artifact_count} "
+            f"children={report.child_report_count} "
+            f"samples={report.total_sample_count}"
+        )
+        if report.summary:
+            lines.append(f"  summary: {report.summary}")
+    return lines
+
+
+def render_global_optimization(snapshot: ControlSnapshot) -> list[str]:
+    lines: list[str] = []
+    workers: dict[str, OptimizationWorkerState] = {
+        worker.worker_id: worker for worker in sorted(snapshot.optimization_workers, key=lambda item: item.worker_id)
+    }
+    if not workers and not snapshot.optimization_tasks:
+        return ["- no global self-optimization state"]
+    for worker in workers.values():
+        lines.append(
+            "- "
+            f"worker={worker.label} [{worker.status}] "
+            f"queue={worker.queue_name} "
+            f"active_task={worker.active_task_id or 'n/a'} "
+            f"completed={worker.completed_tasks} "
+            f"heartbeat={worker.last_heartbeat_at or 'n/a'}"
+        )
+        if worker.summary:
+            lines.append(f"  summary: {worker.summary}")
+    for task in sorted(snapshot.optimization_tasks, key=lambda item: (item.status, item.priority, item.task_id)):
+        lines.append(
+            "- "
+            f"task={task.task_id} [{task.status}] "
+            f"queue={task.queue_name} "
+            f"scope={task.scope} "
+            f"target={task.target_kind} "
+            f"priority={task.priority} "
+            f"competition={task.competition_id or 'n/a'} "
+            f"candidates={len(task.candidate_ids)}"
+        )
+        if task.summary:
+            lines.append(f"  summary: {task.summary}")
+    return lines
+
+
+def render_module_scouts(snapshot: ControlSnapshot, limit: int = 12) -> list[str]:
+    lines: list[str] = []
+    ranked: list[ModuleScoutCandidate] = sorted(
+        snapshot.module_scout_candidates,
+        key=lambda item: (-item.total_score, item.decision, item.candidate_id),
+    )[:limit]
+    if not ranked and not snapshot.module_scout_contracts:
+        return ["- no module scout activity"]
+    for contract in sorted(snapshot.module_scout_contracts, key=lambda item: item.contract_id):
+        lines.append(
+            "- "
+            f"contract={contract.contract_id} "
+            f"module={contract.module_label or contract.module_id} "
+            f"capability={contract.capability} "
+            f"project={contract.project_id or 'global'} "
+            f"max_candidates={contract.max_candidates}"
+        )
+        if contract.summary:
+            lines.append(f"  summary: {contract.summary}")
+    for candidate in ranked:
+        lines.append(
+            "- "
+            f"candidate={candidate.title or candidate.source_id} "
+            f"source={candidate.source_kind}:{candidate.source_id} "
+            f"decision={candidate.decision or 'n/a'} "
+            f"status={candidate.status} "
+            f"install={candidate.install_attempt_status} "
+            f"score={candidate.total_score:.2f} "
+            f"competition={candidate.competition_id or 'n/a'} "
+            f"entry={candidate.score_entry_id or 'n/a'}"
+        )
+        if candidate.summary:
+            lines.append(f"  summary: {candidate.summary}")
+    return lines
+
+
 def render_route_preview(snapshot: ControlSnapshot) -> list[str]:
     if not snapshot.route_preview:
         return ["- no live route preview"]
@@ -374,6 +472,27 @@ def view_to_dict(snapshot: ControlSnapshot, view: str, event_limit: int = 8) -> 
         }
     if view == "diversity-metrics":
         return {"diversity_metrics": _section_payload(snapshot.diversity_metrics, serializer=lambda item: item.to_dict())}
+    if view == "experience-reports":
+        return {
+            "experience_artifacts": _section_payload(snapshot.experience_artifacts, serializer=lambda item: item.to_dict()),
+            "experience_reports": _section_payload(snapshot.experience_reports, serializer=lambda item: item.to_dict()),
+        }
+    if view == "global-optimization":
+        return {
+            "optimization_workers": _section_payload(snapshot.optimization_workers, serializer=lambda item: item.to_dict()),
+            "optimization_tasks": _section_payload(snapshot.optimization_tasks, serializer=lambda item: item.to_dict()),
+        }
+    if view == "module-scouts":
+        return {
+            "module_scout_contracts": _section_payload(
+                snapshot.module_scout_contracts,
+                serializer=lambda item: item.to_dict(),
+            ),
+            "module_scout_candidates": _section_payload(
+                snapshot.module_scout_candidates,
+                serializer=lambda item: item.to_dict(),
+            ),
+        }
     if view == "recent-events":
         events = tuple(sorted(snapshot.events, key=lambda item: item.timestamp)[-event_limit:])
         return {"events": _section_payload(events, serializer=lambda item: item.to_dict())}
@@ -391,6 +510,9 @@ def render_view(snapshot: ControlSnapshot, view: str, event_limit: int = 8) -> s
         "recent-launches": lambda item: render_recent_launches(item, limit=event_limit),
         "capability-summaries": lambda item: render_capability_summaries(item, limit=max(event_limit, 8)),
         "diversity-metrics": render_diversity_metrics,
+        "experience-reports": lambda item: render_experience_reports(item, limit=max(event_limit * 2, 12)),
+        "global-optimization": render_global_optimization,
+        "module-scouts": lambda item: render_module_scouts(item, limit=max(event_limit, 8)),
         "recent-events": lambda item: render_recent_events(item, limit=event_limit),
     }
     titles = {
@@ -403,6 +525,9 @@ def render_view(snapshot: ControlSnapshot, view: str, event_limit: int = 8) -> s
         "recent-launches": "Recent Launches",
         "capability-summaries": "Capability Summaries",
         "diversity-metrics": "Diversity Metrics",
+        "experience-reports": "Experience Reports",
+        "global-optimization": "Global Self-Optimization",
+        "module-scouts": "Module Scouts",
         "recent-events": "Recent Events",
     }
     if view == "dashboard":
@@ -427,6 +552,9 @@ def render_dashboard(snapshot: ControlSnapshot, event_limit: int = 8) -> str:
         _section("Recent Launches", render_recent_launches(snapshot, limit=event_limit)),
         _section("Capability Summaries", render_capability_summaries(snapshot, limit=max(event_limit, 8))),
         _section("Diversity Metrics", render_diversity_metrics(snapshot)),
+        _section("Experience Reports", render_experience_reports(snapshot, limit=max(event_limit * 2, 12))),
+        _section("Global Self-Optimization", render_global_optimization(snapshot)),
+        _section("Module Scouts", render_module_scouts(snapshot, limit=max(event_limit, 8))),
         _section("Recent Events", render_recent_events(snapshot, limit=event_limit)),
     ]
     return "\n\n".join(sections)
